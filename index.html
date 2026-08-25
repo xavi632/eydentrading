@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Eyden Trading Dashboard</title>
+    <style>
+      :root {
+        --bg: #07111d;
+        --bg-2: #0d1a2a;
+        --panel: #101e2f;
+        --panel-2: #16293f;
+        --soft: #1c3553;
+        --card: #102033;
+        --text: #edf5ff;
+        --muted: #9bb4cf;
+        --line: rgba(156, 177, 203, 0.18);
+        --primary: #57d2c1;
+        --primary-2: #86c5ff;
+        --accent: #9a7cff;
+        --success: #38d39f;
+        --warning: #f7c75f;
+        --danger: #ff7a7a;
+        --shadow: 0 22px 60px rgba(2, 7, 16, 0.55);
+      }
+
+      * { box-sizing: border-box; }
+
+      html, body {
+        margin: 0;
+        min-height: 100%;
+        font-family: Inter, "Segoe UI", sans-serif;
+        background:
+          radial-gradient(circle at top left, rgba(87, 210, 193, 0.15), transparent 26%),
+          radial-gradient(circle at bottom right, rgba(154, 124, 255, 0.14), transparent 26%),
+          var(--bg);
+        color: var(--text);
+      }
+
+      body {
+        padding: 24px;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      button {
+        font: inherit;
+      }
+
+      .app-shell {
+        max-width: 1440px;
+        margin: 0 auto;
+        min-height: calc(100vh - 48px);
+        background: rgba(9, 17, 28, 0.72);
+        border: 1px solid var(--line);
+        border-radius: 28px;
+        display: grid;
+        grid-template-columns: 260px 1fr;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+      }
+
+      .sidebar {
+        background: linear-gradient(180deg, rgba(13, 25, 38, 0.96), rgba(12, 21, 34, 0.98));
+        border-right: 1px solid var(--line);
+        padding: 28px 18px 20px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 6px 10px 22px;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        font-size: 1.45rem;
+      }
+
+      .brand-mark {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--primary), var(--primary-2));
+        color: #061923;
+        display: grid;
+        place-items: center;
+        font-size: 1.1rem;
+        font-weight: 900;
+      }
+
+      .menu {
+        display: grid;
+        gap: 8px;
+        margin-top: 16px;
+      }
+
+      .menu a {
+        border: 1px solid transparent;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        color: var(--muted);
+        font-weight: 600;
+        transition: 0.2s ease;
+      }
+
+      .menu a:hover,
+      .menu a.active {
+        background: rgba(87, 210, 193, 0.08);
+        color: var(--text);
+        border-color: rgba(87, 210, 193, 0.18);
+      }
+
+      .menu .icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 9px;
+        display: grid;
+        place-items: center;
+        background: rgba(151, 171, 198, 0.08);
+        font-size: 0.9rem;
+      }
+
+      .sidebar-footer {
+        margin-top: auto;
+      }
+
+      .user-card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px;
+        border-radius: 16px;
+        background: rgba(17, 29, 43, 0.9);
+        border: 1px solid var(--line);
+      }
+
+      .avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: #061923;
+        background: linear-gradient(135deg, var(--primary), #8dece1);
+      }
+
+      .user-card strong {
+        display: block;
+        font-size: 0.95rem;
+      }
+
+      .user-card small {
+        color: var(--muted);
+      }
+
+      .main-panel {
+        padding: 28px;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 24px;
+      }
+
+      .title {
+        font-size: clamp(1.8rem, 2vw, 2.4rem);
+        font-weight: 800;
+        letter-spacing: -0.05em;
+      }
+
+      .toolbar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .search {
+        min-width: 210px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        background: rgba(17, 31, 47, 0.9);
+        border: 1px solid var(--line);
+        color: var(--muted);
+      }
+
+      .primary-btn,
+      .secondary-btn {
+        border: none;
+        cursor: pointer;
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-weight: 700;
+        transition: transform 0.2s ease;
+      }
+
+      .primary-btn:hover,
+      .secondary-btn:hover {
+        transform: translateY(-1px);
+      }
+
+      .primary-btn {
+        background: linear-gradient(135deg, var(--primary), #67e8d2);
+        color: #071821;
+        box-shadow: 0 12px 22px rgba(87, 210, 193, 0.22);
+      }
+
+      .secondary-btn {
+        background: rgba(255, 255, 255, 0.02);
+        color: var(--text);
+        border: 1px solid var(--line);
+      }
+
+      .hero-banner {
+        background: linear-gradient(135deg, rgba(87, 210, 193, 0.12), rgba(154, 124, 255, 0.12));
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        padding: 24px;
+        display: grid;
+        grid-template-columns: 1.25fr 0.75fr;
+        gap: 20px;
+        margin-bottom: 24px;
+      }
+
+      .tag {
+        display: inline-block;
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-size: 0.7rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        background: rgba(87, 210, 193, 0.12);
+        color: var(--primary);
+        border: 1px solid rgba(87, 210, 193, 0.2);
+        margin-bottom: 16px;
+      }
+
+      .hero-banner h2 {
+        margin: 0 0 12px;
+        font-size: clamp(2rem, 3vw, 3.2rem);
+        line-height: 1.05;
+        letter-spacing: -0.06em;
+      }
+
+      .hero-banner p {
+        margin: 0;
+        color: var(--muted);
+        max-width: 560px;
+      }
+
+      .hero-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 22px;
+        flex-wrap: wrap;
+      }
+
+      .mini-card {
+        border-radius: 18px;
+        background: rgba(17, 31, 47, 0.9);
+        border: 1px solid var(--line);
+        padding: 18px;
+      }
+
+      .mini-chart {
+        height: 150px;
+        border-radius: 16px;
+        background: linear-gradient(180deg, rgba(87, 210, 193, 0.13), rgba(151, 171, 198, 0.04));
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 10px 8px;
+        border: 1px solid rgba(155, 180, 207, 0.12);
+      }
+
+      .bar {
+        width: 18%;
+        border-radius: 10px 10px 0 0;
+        background: linear-gradient(180deg, var(--primary), var(--primary-2));
+        opacity: 0.9;
+      }
+
+      .stat-row {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 16px;
+        color: var(--muted);
+      }
+
+      .stat-row strong {
+        color: var(--text);
+        font-size: 1.4rem;
+      }
+
+      .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      .action-card {
+        background: rgba(16, 30, 47, 0.8);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 18px;
+      }
+
+      .action-card .icon-wrap {
+        width: 44px;
+        height: 44px;
+        background: rgba(87, 210, 193, 0.12);
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        margin-bottom: 14px;
+        font-size: 1.2rem;
+      }
+
+      .action-card h3 {
+        margin: 0 0 8px;
+        font-size: 1.1rem;
+      }
+
+      .action-card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+
+      .content-grid {
+        display: grid;
+        grid-template-columns: 1.4fr 0.8fr;
+        gap: 18px;
+      }
+
+      .panel {
+        background: rgba(16, 30, 47, 0.8);
+        border: 1px solid var(--line);
+        border-radius: 22px;
+        padding: 20px;
+      }
+
+      .panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 18px;
+      }
+
+      .panel-header h3 {
+        margin: 0;
+        font-size: 1.2rem;
+      }
+
+      .panel-header a {
+        color: var(--primary);
+        font-weight: 700;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th, td {
+        text-align: left;
+        padding: 14px 8px;
+        border-bottom: 1px solid rgba(155, 180, 207, 0.1);
+      }
+
+      th {
+        color: var(--muted);
+        font-size: 0.72rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        font-weight: 700;
+      }
+
+      td {
+        font-size: 0.96rem;
+      }
+
+      .status {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 7px 10px;
+        font-size: 0.72rem;
+        font-weight: 700;
+      }
+
+      .status.pending { background: rgba(247, 199, 95, 0.12); color: var(--warning); }
+      .status.success { background: rgba(56, 211, 159, 0.12); color: var(--success); }
+      .status.review { background: rgba(154, 124, 255, 0.12); color: #d9caff; }
+
+      .side-stack {
+        display: grid;
+        gap: 18px;
+      }
+
+      .mini-list {
+        display: grid;
+        gap: 12px;
+      }
+
+      .mini-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(155, 180, 207, 0.08);
+      }
+
+      .mini-item:last-child { border-bottom: none; }
+
+      .product-name {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .dot-box {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--primary);
+      }
+
+      .level {
+        font-weight: 700;
+        color: var(--muted);
+      }
+
+      .progress {
+        height: 8px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.05);
+        overflow: hidden;
+        margin-top: 10px;
+      }
+
+      .progress > span {
+        display: block;
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, var(--primary), var(--primary-2));
+      }
+
+      @media (max-width: 1100px) {
+        .app-shell {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+          border-right: none;
+          border-bottom: 1px solid var(--line);
+        }
+
+        .quick-actions {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 760px) {
+        body {
+          padding: 16px;
+        }
+
+        .main-panel {
+          padding: 18px;
+        }
+
+        .topbar,
+        .hero-banner,
+        .content-grid {
+          grid-template-columns: 1fr;
+          display: grid;
+        }
+
+        .toolbar {
+          justify-content: space-between;
+          width: 100%;
+        }
+
+        .quick-actions {
+          grid-template-columns: 1fr;
+        }
+
+        .search {
+          min-width: 0;
+          flex: 1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <span class="brand-mark">E</span>
+          <span>Eyden Trading</span>
+        </div>
+
+        <nav class="menu" aria-label="Main navigation">
+          <a href="#" class="active"><span class="icon">⌂</span>Home</a>
+          <a href="#"><span class="icon">＋</span>Create Bond</a>
+          <a href="#"><span class="icon">▦</span>Products</a>
+          <a href="#"><span class="icon">◎</span>Customers</a>
+          <a href="#"><span class="icon">◫</span>Orders</a>
+          <a href="#"><span class="icon">◇</span>Reports</a>
+          <a href="#"><span class="icon">⚙</span>Settings</a>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="user-card">
+            <div class="avatar">JT</div>
+            <div>
+              <strong>Jude T.</strong>
+              <small>Administrator</small>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main-panel">
+        <header class="topbar">
+          <div class="title">Home</div>
+
+          <div class="toolbar">
+            <div class="search">Search anything...</div>
+            <button class="secondary-btn">Export</button>
+            <button class="primary-btn">+ New Bond</button>
+            <a href="login.html" class="secondary-btn" id="home-login-button">Login</a>
+            <button type="button" class="secondary-btn" id="logout-button" hidden>Logout</button>
+            <span id="home-user-badge" hidden style="padding: 10px 12px; border-radius: 12px; background: rgba(87, 210, 193, 0.1); color: var(--primary); font-weight: 700; display: inline-flex; align-items: center; justify-content: center;"></span>
+          </div>
+        </header>
+
+        <section class="hero-banner">
+          <div>
+            <span class="tag">Today overview</span>
+            <h2>Choose what to do next.</h2>
+            <p>
+              Create a bond, manage products, and keep your sales pipeline moving from one clear dashboard.
+            </p>
+
+            <div class="hero-actions">
+              <button class="primary-btn">Create Bond</button>
+              <button class="secondary-btn">View Products</button>
+            </div>
+          </div>
+
+          <div class="mini-card">
+            <div class="mini-chart" aria-label="chart preview">
+              <span class="bar" style="height: 35%"></span>
+              <span class="bar" style="height: 55%"></span>
+              <span class="bar" style="height: 45%"></span>
+              <span class="bar" style="height: 72%"></span>
+              <span class="bar" style="height: 82%"></span>
+              <span class="bar" style="height: 96%"></span>
+            </div>
+            <div class="stat-row">
+              <span>Sales</span>
+              <strong>$58.2k</strong>
+            </div>
+          </div>
+        </section>
+
+        <section class="quick-actions" aria-label="Quick actions">
+          <div class="action-card">
+            <div class="icon-wrap">＋</div>
+            <h3>Create Bond</h3>
+            <p>Start a new customer bond or sales agreement.</p>
+          </div>
+
+          <div class="action-card">
+            <div class="icon-wrap">▣</div>
+            <h3>Products</h3>
+            <p>Browse stock, prices, and item details.</p>
+          </div>
+
+          <div class="action-card">
+            <div class="icon-wrap">◌</div>
+            <h3>Customers</h3>
+            <p>Review contacts, leads, and saved profiles.</p>
+          </div>
+
+          <div class="action-card">
+            <div class="icon-wrap">⚙</div>
+            <h3>Settings</h3>
+            <p>Adjust teams, payment rules, and preferences.</p>
+            <button type="button" id="admin-access-btn" class="primary-btn" style="margin-top: 12px; display: inline-block;">Admin Account</button>
+          </div>
+        </section>
+
+        <section class="content-grid">
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Recent Bonds</h3>
+              <a href="#">See all</a>
+            </div>
+
+            <table>
+              <thead>
+                <tr>
+                  <th>Client</th>
+                  <th>Type</th>
+                  <th>Value</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Alpha Retail</td>
+                  <td>Product Bond</td>
+                  <td>$12,400</td>
+                  <td><span class="status success">Paid</span></td>
+                </tr>
+                <tr>
+                  <td>Bright Supply</td>
+                  <td>Service Bond</td>
+                  <td>$8,650</td>
+                  <td><span class="status pending">Pending</span></td>
+                </tr>
+                <tr>
+                  <td>Northline Co.</td>
+                  <td>Wholesale</td>
+                  <td>$19,200</td>
+                  <td><span class="status review">Review</span></td>
+                </tr>
+                <tr>
+                  <td>Sunrise Market</td>
+                  <td>Recurring</td>
+                  <td>$5,980</td>
+                  <td><span class="status success">Active</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="side-stack">
+            <div class="panel">
+              <div class="panel-header">
+                <h3>Inventory</h3>
+                <a href="#">Open</a>
+              </div>
+
+              <div class="mini-list">
+                <div class="mini-item">
+                  <div class="product-name"><span class="dot-box"></span> Premium Box</div>
+                  <span class="level">74%</span>
+                </div>
+                <div class="mini-item">
+                  <div class="product-name"><span class="dot-box" style="background: var(--accent);"></span> Smart Kit</div>
+                  <span class="level">52%</span>
+                </div>
+                <div class="mini-item">
+                  <div class="product-name"><span class="dot-box" style="background: var(--warning);"></span> Travel Pack</div>
+                  <span class="level">89%</span>
+                </div>
+              </div>
+
+              <div class="progress"><span style="width: 74%"></span></div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-header">
+                <h3>Tasks</h3>
+                <a href="#">View</a>
+              </div>
+
+              <div class="mini-list">
+                <div class="mini-item">
+                  <span>Approve invoice</span>
+                  <span class="status review">2h</span>
+                </div>
+                <div class="mini-item">
+                  <span>Call new customer</span>
+                  <span class="status pending">Today</span>
+                </div>
+                <div class="mini-item">
+                  <span>Update product list</span>
+                  <span class="status success">Done</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+    <div id="admin-password-modal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.55); display: none; align-items: center; justify-content: center; z-index: 9999;">
+      <div style="background: #0f1d2d; border: 1px solid rgba(156, 177, 203, 0.2); border-radius: 18px; width: min(420px, calc(100% - 32px)); padding: 24px; box-shadow: 0 28px 60px rgba(0,0,0,0.4);">
+        <h3 style="margin: 0 0 10px; font-size: 1.4rem; letter-spacing: -0.04em;">Admin Access</h3>
+        <p style="margin: 0 0 18px; color: #9bb4cf;">Enter the password to open the dashboard.</p>
+        <input id="admin-password-input" type="password" placeholder="Enter password" autocomplete="off" style="width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(156, 177, 203, 0.25); background: rgba(17, 31, 47, 0.9); color: #edf5ff; margin-bottom: 12px; font: inherit;" />
+        <label style="display: flex; align-items: center; gap: 10px; color: #9bb4cf; font-size: 0.95rem; margin-bottom: 16px;">
+          <input id="admin-remember-me" type="checkbox" />
+          Remember me
+        </label>
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" id="admin-cancel-btn" class="secondary-btn">Cancel</button>
+          <button type="button" id="admin-submit-btn" class="primary-btn">Open Dashboard</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const ADMIN_PASSWORD = 'xavemi77';
+      const ADMIN_REMEMBER_KEY = 'eyden_admin_remembered';
+
+      function updateHomeAuthButtons() {
+        const user = JSON.parse(localStorage.getItem('user_session') || 'null');
+        const loginButton = document.getElementById('home-login-button');
+        const logoutButton = document.getElementById('logout-button');
+        const userBadge = document.getElementById('home-user-badge');
+
+        if (user) {
+          if (loginButton) loginButton.style.display = 'none';
+          if (logoutButton) {
+            logoutButton.hidden = false;
+            logoutButton.textContent = 'Logout · ' + user.name;
+          }
+          if (userBadge) {
+            userBadge.textContent = user.name;
+            userBadge.hidden = false;
+          }
+        } else {
+          if (loginButton) loginButton.style.display = 'inline-flex';
+          if (logoutButton) logoutButton.hidden = true;
+          if (userBadge) userBadge.hidden = true;
+        }
+      }
+
+      function grantAdminAccess(rememberMe) {
+        if (rememberMe) {
+          localStorage.setItem(ADMIN_REMEMBER_KEY, 'true');
+        } else {
+          localStorage.removeItem(ADMIN_REMEMBER_KEY);
+        }
+        window.location.href = 'admin-dashboard.html';
+      }
+
+      const adminAccessButton = document.getElementById('admin-access-btn');
+      const adminPasswordModal = document.getElementById('admin-password-modal');
+      const adminPasswordInput = document.getElementById('admin-password-input');
+      const adminRememberMe = document.getElementById('admin-remember-me');
+      const adminCancelBtn = document.getElementById('admin-cancel-btn');
+      const adminSubmitBtn = document.getElementById('admin-submit-btn');
+
+      if (localStorage.getItem(ADMIN_REMEMBER_KEY) === 'true') {
+        window.location.href = 'admin-dashboard.html';
+      }
+
+      if (adminAccessButton) {
+        adminAccessButton.addEventListener('click', () => {
+          if (adminPasswordModal) {
+            adminPasswordModal.style.display = 'flex';
+          }
+          if (adminPasswordInput) {
+            adminPasswordInput.value = '';
+            adminPasswordInput.focus();
+          }
+        });
+      }
+
+      if (adminCancelBtn) {
+        adminCancelBtn.addEventListener('click', () => {
+          if (adminPasswordModal) adminPasswordModal.style.display = 'none';
+        });
+      }
+
+      if (adminSubmitBtn) {
+        adminSubmitBtn.addEventListener('click', () => {
+          const enteredPassword = adminPasswordInput ? adminPasswordInput.value.trim() : '';
+          const rememberMe = adminRememberMe ? adminRememberMe.checked : false;
+
+          if (enteredPassword === ADMIN_PASSWORD) {
+            grantAdminAccess(rememberMe);
+          } else {
+            alert('Incorrect password. Please try again.');
+            if (adminPasswordInput) adminPasswordInput.focus();
+          }
+        });
+      }
+
+      if (adminPasswordInput) {
+        adminPasswordInput.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter') {
+            adminSubmitBtn.click();
+          }
+          if (event.key === 'Escape') {
+            adminPasswordModal.style.display = 'none';
+          }
+        });
+      }
+
+      if (adminPasswordModal) {
+        adminPasswordModal.addEventListener('click', (event) => {
+          if (event.target === adminPasswordModal) {
+            adminPasswordModal.style.display = 'none';
+          }
+        });
+      }
+
+      document.addEventListener('DOMContentLoaded', updateHomeAuthButtons);
+
+      const logoutButton = document.getElementById('logout-button');
+      if (logoutButton) {
+        logoutButton.addEventListener('click', () => {
+          localStorage.removeItem('user_session');
+          localStorage.removeItem('selected_customer');
+          updateHomeAuthButtons();
+        });
+      }
+    </script>
+    <script src="auth.js"></script>
+  </body>
+</html>
+
+              <span>Pipeline visibility</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="features" class="section">
+        <div class="container">
+          <div class="section-head">
+            <span class="eyebrow">Everything your team needs</span>
+            <h2>Sales automation that keeps momentum moving.</h2>
+            <p>
+              From inbound lead capture to deal forecasting, Eyden Trading helps revenue teams work faster, smarter, and with more visibility.
+            </p>
+          </div>
+
+          <div class="feature-grid">
+            <article class="feature-card">
+              <div class="icon-wrap">⚡</div>
+              <h3>Smart automations</h3>
+              <p>Trigger tasks, emails, and reminders automatically to keep every lead moving without manual follow-up.</p>
+            </article>
+
+            <article class="feature-card">
+              <div class="icon-wrap">📊</div>
+              <h3>Forecasting insights</h3>
+              <p>Track opportunities in real time and see where your pipeline is strongest, weakest, and most likely to close.</p>
+            </article>
+
+            <article class="feature-card">
+              <div class="icon-wrap">🤝</div>
+              <h3>Client relationship tracking</h3>
+              <p>Keep every touchpoint, note, and conversation connected to the right account for stronger relationships.</p>
+            </article>
+
+            <article class="feature-card">
+              <div class="icon-wrap">🧠</div>
+              <h3>AI-assisted workflows</h3>
+              <p>Surface next best actions, summaries, and recommendations to help reps act quickly with confidence.</p>
+            </article>
+
+            <article class="feature-card">
+              <div class="icon-wrap">📈</div>
+              <h3>Pipeline visibility</h3>
+              <p>Understand team performance across stages with dashboards built for leaders and frontline sellers.</p>
+            </article>
+
+            <article class="feature-card">
+              <div class="icon-wrap">🔒</div>
+              <h3>Secure collaboration</h3>
+              <p>Share insights, assign tasks, and keep your entire revenue org aligned in one place without the chaos.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="solutions" class="section">
+        <div class="container">
+          <div class="promo">
+            <div class="promo-grid">
+              <div>
+                <span class="eyebrow">Built for growth teams</span>
+                <h2 style="margin:22px 0 18px; font-size: clamp(2rem, 3vw, 3rem); letter-spacing:-0.05em;">One platform for sales, marketing, and customer success.</h2>
+                <div class="mini-list">
+                  <div class="mini-item">
+                    <span class="check">✓</span>
+                    <div>
+                      <strong>Unified customer view</strong>
+                      <span>See all activity, notes, deal history, and next steps in a single timeline.</span>
+                    </div>
+                  </div>
+                  <div class="mini-item">
+                    <span class="check">✓</span>
+                    <div>
+                      <strong>Actionable reporting</strong>
+                      <span>Monitor conversion, revenue velocity, and rep productivity without spreadsheet cleanup.</span>
+                    </div>
+                  </div>
+                  <div class="mini-item">
+                    <span class="check">✓</span>
+                    <div>
+                      <strong>Fast onboarding</strong>
+                      <span>Get teams using the system in days, not months, with simple workflows and templates.</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="promo-card">
+                <div class="panel" style="padding: 10px 0 0; border: none; background: transparent;">
+                  <div class="stack-list">
+                    <div class="stack-row"><span>Qualified leads</span><span class="pill">+219%</span></div>
+                    <div class="stack-row"><span>Deal cycle time</span><span class="pill warn">-26%</span></div>
+                    <div class="stack-row"><span>Meeting conversion</span><span class="pill">+41%</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="section-head">
+            <span class="eyebrow">How it works</span>
+            <h2>Simple steps. More wins.</h2>
+          </div>
+
+          <div class="steps">
+            <article class="step-card">
+              <div class="step-badge">1</div>
+              <h3>Capture leads</h3>
+              <p>Collect inbound requests, imports, and prospect activity in one source of truth.</p>
+            </article>
+
+            <article class="step-card">
+              <div class="step-badge">2</div>
+              <h3>Automate follow-up</h3>
+              <p>Build sequences, trigger reminders, and prioritize high-intent accounts automatically.</p>
+            </article>
+
+            <article class="step-card">
+              <div class="step-badge">3</div>
+              <h3>Close with confidence</h3>
+              <p>Track progress, strengthen account strategy, and keep stakeholders aligned to close faster.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="reviews" class="section">
+        <div class="container">
+          <div class="section-head">
+            <span class="eyebrow">Loved by revenue leaders</span>
+            <h2>Teams trust Eyden Trading to scale smarter.</h2>
+          </div>
+
+          <div class="testimonial-grid">
+            <article class="quote">
+              <div class="stars">★★★★★</div>
+              <p>"Eyden Trading gave our sales team instant visibility into pipeline health. We reduced follow-up delays and improved conversion in the first month."</p>
+              <div class="person">
+                <div class="avatar">AM</div>
+                <div>
+                  <strong>Alicia Moore</strong>
+                  <span>VP Revenue, Northstar</span>
+                </div>
+              </div>
+            </article>
+
+            <article class="quote">
+              <div class="stars">★★★★★</div>
+              <p>"It feels like a CRM and a growth engine in one. The automation rules alone saved our team hours every week."</p>
+              <div class="person">
+                <div class="avatar">JT</div>
+                <div>
+                  <strong>James Tran</strong>
+                  <span>Sales Director, Kepler</span>
+                </div>
+              </div>
+            </article>
+
+            <article class="quote">
+              <div class="stars">★★★★★</div>
+              <p>"The dashboards are clear, the workflow is frictionless, and leadership finally has real-time visibility across the funnel."</p>
+              <div class="person">
+                <div class="avatar">SR</div>
+                <div>
+                  <strong>Sophia Reed</strong>
+                  <span>Head of Growth, BloomWorks</span>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="pricing" class="section">
+        <div class="container">
+          <div class="section-head">
+            <span class="eyebrow">Flexible pricing</span>
+            <h2>Built to fit teams at every stage.</h2>
+          </div>
+
+          <div class="pricing-wrap">
+            <article class="price-card">
+              <div class="tag">Starter</div>
+              <h3>Launch</h3>
+              <div class="amount">$29<span>/seat</span></div>
+              <p>For small teams getting organized.</p>
+              <ul class="price-list">
+                <li>Lead capture and pipeline management</li>
+                <li>Basic automations</li>
+                <li>Shared team dashboard</li>
+              </ul>
+              <a href="#contact" class="btn btn-secondary" style="width:100%;">Try for free</a>
+            </article>
+
+            <article class="price-card featured">
+              <div class="tag">Most popular</div>
+              <h3>Growth</h3>
+              <div class="amount">$79<span>/seat</span></div>
+              <p>For scaling teams with bigger goals.</p>
+              <ul class="price-list">
+                <li>Advanced workflows and automation</li>
+                <li>AI-assisted scoring and suggestions</li>
+                <li>Forecasting and KPI tracking</li>
+              </ul>
+              <a href="#contact" class="btn btn-primary" style="width:100%;">Start now</a>
+            </article>
+
+            <article class="price-card">
+              <div class="tag">Enterprise</div>
+              <h3>Scale</h3>
+              <div class="amount">Custom</div>
+              <p>Advanced control for larger sales orgs.</p>
+              <ul class="price-list">
+                <li>Custom onboarding and support</li>
+                <li>Permissions and governance</li>
+                <li>Dedicated success partner</li>
+              </ul>
+              <a href="#contact" class="btn btn-secondary" style="width:100%;">Talk to sales</a>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="contact" class="section">
+        <div class="container">
+          <div class="cta-box">
+            <div>
+              <h2>Ready to build a faster sales engine?</h2>
+              <p>See how Eyden Trading can transform your pipeline and help your team sell with more focus.</p>
+            </div>
+
+            <div class="hero-actions" style="margin-top:0;">
+              <a href="mailto:hello@eydentrading.com" class="btn btn-primary">Book a demo</a>
+              <a href="#top" class="btn btn-secondary">Back to top</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="container footer-row">
+        <div class="brand" aria-label="Eyden Trading footer logo">
+          <span class="brand-mark">E</span>
+          <span>Eyden Trading</span>
+        </div>
+
+        <div class="footer-links">
+          <a href="#features">Features</a>
+          <a href="#pricing">Pricing</a>
+          <a href="#reviews">Reviews</a>
+          <a href="#contact">Contact</a>
+        </div>
+
+        <span>© 2026 Eyden Trading. All rights reserved.</span>
+      </div>
+    </footer>
+  </body>
+</html>

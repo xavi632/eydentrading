@@ -1,0 +1,14 @@
+<!-- Add this script tag to the end of your HTML files before closing </body> -->
+<script src="auth.js"></script>
+
+<!-- This will automatically:
+1. Check if user is logged in
+2. Redirect to login.html if not authenticated
+3. Update the user card with logged-in user info
+4. Allow logout via authHelper.logout()
+
+Usage:
+- Check if logged in: window.authHelper.isLoggedIn()
+- Logout: window.authHelper.logout()
+- Get current user: window.authHelper.getCurrentUser()
+-->

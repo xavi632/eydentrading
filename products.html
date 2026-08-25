@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Eyden Trading | Products</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <span class="brand-mark">E</span>
+          <span>Eyden Trading</span>
+        </div>
+
+        <nav class="menu" aria-label="Main navigation">
+          <a href="index.html"><span class="icon">⌂</span>Home</a>
+          <a href="create-bond.html"><span class="icon">＋</span>Create Bond</a>
+          <a href="products.html" class="active"><span class="icon">▦</span>Products</a>
+          <a href="customers.html"><span class="icon">◎</span>Customers</a>
+          <a href="orders.html"><span class="icon">◫</span>Orders</a>
+          <a href="reports.html"><span class="icon">◇</span>Reports</a>
+          <a href="settings.html"><span class="icon">⚙</span>Settings</a>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="user-card">
+            <div class="avatar">JT</div>
+            <div>
+              <strong>Jude T.</strong>
+              <small>Administrator</small>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main-panel">
+        <header class="topbar">
+          <div class="title">Catalogus</div>
+
+          <div class="toolbar">
+            <div class="search-wrap">
+              <span class="search-icon">⌕</span>
+              <input class="search" type="text" placeholder="Zoeken" />
+            </div>
+            <div class="action-icons">
+              <button aria-label="Filter">☰</button>
+              <button aria-label="Sort">↕</button>
+              <a href="orders.html" class="primary-btn" style="padding: 8px 16px; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center;">Go to Orders →</a>
+            </div>
+          </div>
+        </header>
+
+        <div class="catalog-header">
+          <div class="subheader" id="customer-display">Er is geen klant geselecteerd</div>
+          <div class="count-badge">463 producten</div>
+        </div>
+        
+        <script>
+          (function(){
+            try {
+              const selectedCustomer = JSON.parse(localStorage.getItem('selected_customer'));
+              if(selectedCustomer) {
+                document.getElementById('customer-display').textContent = `Klant: ${selectedCustomer.name} (${selectedCustomer.id})`;
+              }
+            } catch(e) {
+              console.warn('Could not load selected customer');
+            }
+          })();
+        </script>
+
+        <section class="product-grid" id="product-grid" aria-live="polite"></section>
+        <script src="cart.js"></script>
+        <script>
+          (function(){
+            const defaultProducts = [
+              { sku: '101001', title: 'Aardappelen', price: 520.00, image: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=500&q=80', inStock: true },
+              { sku: '101002', title: 'Ui', price: 320.00, image: 'https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=crop&w=500&q=80', inStock: false },
+              { sku: '101003', title: 'Zout', price: 180.00, image: 'https://images.unsplash.com/photo-1603048588665-791ca8aea617?auto=format&fit=crop&w=500&q=80', inStock: true },
+              { sku: '101004', title: 'Bloem', price: 410.00, image: 'https://images.unsplash.com/photo-1582515073490-39981397c445?auto=format&fit=crop&w=500&q=80', inStock: true },
+              { sku: '101005', title: 'Tomaten', price: 610.00, image: 'https://images.unsplash.com/photo-1566385090619-5a2d5b0a6a81?auto=format&fit=crop&w=500&q=80', inStock: false },
+              { sku: '101006', title: 'Wortelen', price: 290.00, image: 'https://images.unsplash.com/photo-1447175008436-0541705f3b6a?auto=format&fit=crop&w=500&q=80', inStock: true }
+            ];
+
+            function getProducts() {
+              try {
+                const raw = localStorage.getItem('eyden_products_v1');
+                if (raw) {
+                  const parsed = JSON.parse(raw);
+                  if (Array.isArray(parsed) && parsed.length) return parsed;
+                }
+              } catch (e) {
+                console.warn('Could not read product list', e);
+              }
+              return defaultProducts;
+            }
+
+            function formatPrice(value) {
+              return 'Srd ' + Number(value).toFixed(2).replace('.', ',');
+            }
+
+            function setQty(el, q) {
+              const qtyValue = el.querySelector('.qty-value');
+              if (qtyValue) qtyValue.textContent = q;
+            }
+
+            function renderProducts() {
+              const grid = document.getElementById('product-grid');
+              if (!grid) return;
+
+              const products = getProducts();
+              const countBadge = document.querySelector('.count-badge');
+              if (countBadge) countBadge.textContent = `${products.length} producten`;
+
+              grid.innerHTML = products.map((product) => `
+                <article class="product-card" data-sku="${product.sku}" data-price="${product.price}" data-title="${product.title}" data-image="${product.image || ''}">
+                  <div class="product-image-wrap">
+                    <img class="product-image" src="${product.image || ''}" alt="${product.title}" />
+                    <button class="favorite-btn" aria-label="Save favorite">♡</button>
+                  </div>
+                  <div class="product-info">
+                    <div>
+                      <div class="product-code">${product.sku}</div>
+                      <h3 class="product-title">${product.title}</h3>
+                    </div>
+
+                    <div>
+                      <span class="product-price">${formatPrice(product.price)}</span>
+                      <span class="stock-badge ${product.inStock ? 'in-stock' : 'out-of-stock'}">${product.inStock ? 'Op voorraad' : 'Niet op voorraad'}</span>
+                    </div>
+
+                    <div class="product-footer">
+                      <div class="qty-stepper" aria-label="Quantity selector">
+                        <button type="button" class="dec">−</button>
+                        <span class="qty-value">0</span>
+                        <button type="button" class="inc">+</button>
+                      </div>
+                      <button type="button" class="add-btn">Toevoegen</button>
+                    </div>
+                  </div>
+                </article>
+              `).join('');
+
+              document.querySelectorAll('.product-card').forEach((card) => {
+                const meta = {
+                  sku: card.dataset.sku,
+                  price: parseFloat(card.dataset.price || 0),
+                  title: card.dataset.title || '',
+                  image: card.dataset.image || ''
+                };
+
+                const dec = card.querySelector('.dec');
+                const inc = card.querySelector('.inc');
+                const qtyEl = card.querySelector('.qty-value');
+                const addBtn = card.querySelector('.add-btn');
+
+                const init = window.Cart.getItems()[meta.sku];
+                if (init && init.quantity) setQty(card, init.quantity);
+
+                dec.addEventListener('click', () => {
+                  const cur = parseInt(qtyEl.textContent, 10) || 0;
+                  const next = Math.max(0, cur - 1);
+                  setQty(card, next);
+                  if (next > 0) {
+                    window.Cart.setItem(meta.sku, { title: meta.title, price: meta.price, image: meta.image, quantity: next });
+                  } else {
+                    window.Cart.updateQuantity(meta.sku, 0);
+                  }
+                });
+
+                inc.addEventListener('click', () => {
+                  const cur = parseInt(qtyEl.textContent, 10) || 0;
+                  const next = cur + 1;
+                  setQty(card, next);
+                  window.Cart.setItem(meta.sku, { title: meta.title, price: meta.price, image: meta.image, quantity: next });
+                });
+
+                addBtn.addEventListener('click', () => {
+                  const cur = parseInt(qtyEl.textContent, 10) || 0;
+                  if (cur > 0) {
+                    window.Cart.setItem(meta.sku, { title: meta.title, price: meta.price, image: meta.image, quantity: cur });
+
+                    try {
+                      const key = 'eyden_order_draft';
+                      const raw = localStorage.getItem(key);
+                      const draft = raw ? JSON.parse(raw) : {};
+                      draft[meta.sku] = draft[meta.sku] || { sku: meta.sku, title: meta.title, price: meta.price, quantity: 0, image: meta.image };
+                      draft[meta.sku].quantity = (parseInt(draft[meta.sku].quantity, 10) || 0) + cur;
+                      localStorage.setItem(key, JSON.stringify(draft));
+                    } catch (e) {
+                      console.warn('draft save failed', e);
+                    }
+                  }
+                });
+              });
+
+              window.Cart.subscribe((items) => {
+                document.querySelectorAll('.product-card').forEach((card) => {
+                  const sku = card.dataset.sku;
+                  const item = items.find((x) => x.sku === sku);
+                  const quantity = item ? item.quantity : 0;
+                  setQty(card, quantity);
+                });
+              });
+            }
+
+            renderProducts();
+          })();
+        </script>
+      </main>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Eyden | Customers</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <span class="brand-mark">E</span>
+          <span>Eyden</span>
+        </div>
+
+        <nav class="menu" aria-label="Main navigation">
+          <a href="index.html"><span class="icon">⌂</span>Home</a>
+          <a href="create-bond.html"><span class="icon">＋</span>Create Bond</a>
+          <a href="products.html"><span class="icon">▦</span>Products</a>
+          <a href="customers.html" class="active"><span class="icon">◎</span>Customers</a>
+          <a href="orders.html"><span class="icon">◫</span>Orders</a>
+          <a href="reports.html"><span class="icon">◇</span>Reports</a>
+          <a href="settings.html"><span class="icon">⚙</span>Settings</a>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="user-card">
+            <div class="avatar">JT</div>
+            <div>
+              <strong>Jude T.</strong>
+              <small>Administrator</small>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main-panel">
+        <div class="location-layout">
+          <section class="list-panel">
+            <div class="list-panel-header">
+              <h3>Klanten - 10</h3>
+              <div class="distance-indicator">10 km</div>
+            </div>
+
+            <div class="filter-row">
+              <span class="filter-label">Filter op zichtbaar kaartgebied</span>
+              <span class="switch on" aria-label="Filter toggle"></span>
+            </div>
+
+            <div class="search-box">
+              <span>⌕</span>
+              <input type="text" placeholder="Zoeken" />
+              <button class="cancel-btn" type="button">Cancel</button>
+            </div>
+
+            <div class="client-list">
+              <div class="client-item active">
+                <h4 class="client-name">CHEN LU YA MEI</h4>
+                <span class="client-code">20115</span>
+                <div class="client-address">KWATTA WEG # 822, 08 KWATTA3 SR</div>
+              </div>
+
+              <div class="client-item">
+                <h4 class="client-name">MARIO MENDOZA</h4>
+                <span class="client-code">20122</span>
+                <div class="client-address">BROWNS PLAIN ROAD 45, PARAMARIBO</div>
+              </div>
+
+              <div class="client-item">
+                <h4 class="client-name">JULIA DENNIS</h4>
+                <span class="client-code">20131</span>
+                <div class="client-address">SABAJE GESCHCT 12, COMPLEX C</div>
+              </div>
+
+              <div class="client-item">
+                <h4 class="client-name">PAUL SMITH</h4>
+                <span class="client-code">20146</span>
+                <div class="client-address">ALEXANDER STREET 212, CENTRAL</div>
+              </div>
+
+              <div class="client-item">
+                <h4 class="client-name">ANITA GROOT</h4>
+                <span class="client-code">20158</span>
+                <div class="client-address">MOROCCO STRAAT 88, NOORDERSTAD</div>
+              </div>
+            </div>
+          </section>
+
+          <section class="map-panel" aria-label="Map view">
+            <div class="map-label">Kaart</div>
+            <span class="marker m1"></span>
+            <span class="marker m2"></span>
+            <span class="marker m3"></span>
+            <span class="marker m4"></span>
+
+            <div class="info-card">
+              <div class="info-card-header">
+                <div style="display:flex; align-items:flex-start; gap:12px;">
+                  <div class="pin-wrap">📍</div>
+                  <div>
+                    <h4>CHEN LU YA MEI</h4>
+                    <p class="address">KWATTA WEG # 822, 08 KWATTA3 SR</p>
+                  </div>
+                </div>
+                <button class="info-close" type="button">×</button>
+              </div>
+
+              <div class="action-bar">
+                <button class="action-btn" type="button"><span class="icon">☎</span>Bellen</button>
+                <button class="action-btn" type="button"><span class="icon">✉</span>Emailadres</button>
+                <button class="action-btn" type="button"><span class="icon">✎</span>Notitie</button>
+                <button class="action-btn" type="button"><span class="icon">↗</span>Route</button>
+                <button class="action-btn" type="button"><span class="icon">▣</span>Stock</button>
+                <button class="action-btn" type="button"><span class="icon">ℹ</span>Details</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

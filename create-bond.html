@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Eyden Trading | Create Bond</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      .customer-selection {
+        padding: 24px;
+      }
+      
+      .customer-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+      
+      .customer-card {
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        padding: 16px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      
+      .customer-card:hover {
+        border-color: #0066cc;
+        background: #f5f9ff;
+      }
+      
+      .customer-card.selected {
+        border-color: #0066cc;
+        background: #e6f0ff;
+        box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+      }
+      
+      .customer-card h3 {
+        margin: 0 0 8px 0;
+        font-size: 16px;
+      }
+      
+      .customer-card .customer-id {
+        color: #666;
+        font-size: 13px;
+        margin-bottom: 8px;
+      }
+      
+      .customer-card .checkmark {
+        display: none;
+        color: #0066cc;
+        font-size: 20px;
+        font-weight: bold;
+        text-align: right;
+      }
+      
+      .customer-card.selected .checkmark {
+        display: block;
+      }
+      
+      .form-section {
+        background: #f9f9f9;
+        padding: 20px;
+        border-radius: 8px;
+        margin-top: 20px;
+      }
+      
+      .form-section h3 {
+        margin-top: 0;
+      }
+      
+      .action-buttons {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        margin-top: 20px;
+      }
+      
+      .search-bar {
+        margin-bottom: 20px;
+      }
+      
+      .search-bar input {
+        width: 100%;
+        padding: 12px 16px;
+        font-size: 16px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-family: inherit;
+        transition: border-color 0.2s;
+      }
+      
+      .search-bar input:focus {
+        outline: none;
+        border-color: #0066cc;
+      }
+      
+      .search-bar input::placeholder {
+        color: #999;
+      }
+      
+      .no-results {
+        text-align: center;
+        padding: 40px 20px;
+        color: #999;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <span class="brand-mark">E</span>
+          <span>Eyden Trading</span>
+        </div>
+
+        <nav class="menu" aria-label="Main navigation">
+          <a href="index.html"><span class="icon">⌂</span>Home</a>
+          <a href="create-bond.html" class="active"><span class="icon">＋</span>Create Bond</a>
+          <a href="products.html"><span class="icon">▦</span>Products</a>
+          <a href="customers.html"><span class="icon">◎</span>Customers</a>
+          <a href="orders.html"><span class="icon">◫</span>Orders</a>
+          <a href="reports.html"><span class="icon">◇</span>Reports</a>
+          <a href="settings.html"><span class="icon">⚙</span>Settings</a>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="user-card">
+            <div class="avatar">JT</div>
+            <div>
+              <strong>Jude T.</strong>
+              <small>Administrator</small>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main-panel">
+        <header class="topbar">
+          <div class="title">Start Your Sale</div>
+
+          <div class="toolbar">
+            <a href="index.html" class="secondary-btn">← Back Home</a>
+          </div>
+        </header>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h3>Select a Customer to Begin</h3>
+            <small>Choose the customer you're creating this sale for</small>
+          </div>
+
+          <div class="customer-selection">
+            <div class="search-bar">
+              <input 
+                type="text" 
+                id="customer-search" 
+                placeholder="Search customers by name or ID..."
+                autocomplete="off"
+              />
+            </div>
+
+            <div class="customer-list" id="customer-list">
+              <!-- Customers will be loaded here -->
+            </div>
+
+            <div class="form-section">
+              <h3>Selected Customer</h3>
+              <div id="selected-customer-display" style="padding: 16px; background: white; border-radius: 6px; border: 1px solid #ddd; color: #999;">
+                Please select a customer above
+              </div>
+            </div>
+
+            <div class="action-buttons">
+              <button id="cancel-btn" class="secondary-btn">Cancel</button>
+              <button id="confirm-btn" class="primary-btn" disabled>Continue to Products</button>
+            </div>
+          </div>
+        </section>
+
+        <script>
+          (function(){
+            const customerList = document.getElementById('customer-list');
+            const selectedDisplay = document.getElementById('selected-customer-display');
+            const confirmBtn = document.getElementById('confirm-btn');
+            const cancelBtn = document.getElementById('cancel-btn');
+            const searchInput = document.getElementById('customer-search');
+
+            // Sample customers (same as in new-order.html)
+            const customers = [
+              { id: '20115', name: 'CHEN LU YA MEI' },
+              { id: '20122', name: 'MARIO MENDOZA' },
+              { id: '20131', name: 'JULIA DENNIS' },
+              { id: '20146', name: 'PAUL SMITH' },
+              { id: '20158', name: 'ANITA GROOT' }
+            ];
+
+            let selectedCustomer = null;
+
+            // Render customer cards based on filter
+            function renderCustomers(filterText = '') {
+              const filtered = customers.filter(customer => 
+                customer.name.toLowerCase().includes(filterText.toLowerCase()) ||
+                customer.id.includes(filterText)
+              );
+
+              if(filtered.length === 0) {
+                customerList.innerHTML = '<div class="no-results">No customers found matching your search</div>';
+                return;
+              }
+
+              customerList.innerHTML = filtered.map(customer => `
+                <div class="customer-card" data-id="${customer.id}" data-name="${customer.name}">
+                  <h3>${customer.name}</h3>
+                  <div class="customer-id">ID: ${customer.id}</div>
+                  <div class="checkmark">✓</div>
+                </div>
+              `).join('');
+
+              // Add click listeners
+              document.querySelectorAll('.customer-card').forEach(card => {
+                card.addEventListener('click', () => {
+                  // Remove previous selection
+                  document.querySelectorAll('.customer-card').forEach(c => c.classList.remove('selected'));
+                  
+                  // Select this card
+                  card.classList.add('selected');
+                  selectedCustomer = {
+                    id: card.dataset.id,
+                    name: card.dataset.name
+                  };
+
+                  // Update display
+                  selectedDisplay.innerHTML = `
+                    <strong>${selectedCustomer.name}</strong><br>
+                    <small style="color: #666;">Customer ID: ${selectedCustomer.id}</small>
+                  `;
+                  selectedDisplay.style.color = '#000';
+
+                  // Enable confirm button
+                  confirmBtn.disabled = false;
+                });
+              });
+            }
+
+            // Search input event listener
+            searchInput.addEventListener('input', (e) => {
+              renderCustomers(e.target.value);
+            });
+
+            // Confirm selection
+            confirmBtn.addEventListener('click', () => {
+              if(!selectedCustomer) return;
+              
+              // Store selected customer in localStorage
+              try {
+                localStorage.setItem('selected_customer', JSON.stringify(selectedCustomer));
+              } catch(e) {
+                console.warn('Could not store customer selection', e);
+              }
+
+              // Redirect to products page
+              window.location.href = 'products.html';
+            });
+
+            // Cancel
+            cancelBtn.addEventListener('click', () => {
+              window.location.href = 'index.html';
+            });
+
+            // Initial render
+            renderCustomers();
+          })();
+        </script>
+      </main>
+    </div>
+  </body>
+</html>

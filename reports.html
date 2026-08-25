@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Eyden Trading | Reports</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      /* Receipt/Bon Styles */
+      .receipt-modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: 20px;
+      }
+      
+      .receipt-container {
+        background: white;
+        border-radius: 8px;
+        width: 100%;
+        max-width: 600px;
+        max-height: 90vh;
+        overflow: auto;
+        position: relative;
+      }
+      
+      .receipt-actions {
+        position: sticky;
+        top: 0;
+        background: white;
+        border-bottom: 1px solid #eee;
+        padding: 16px;
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+        z-index: 10;
+      }
+      
+      .receipt-content {
+        padding: 40px;
+        font-family: 'Courier New', monospace;
+        line-height: 1.6;
+        background: white;
+        color: black;
+      }
+      
+      .receipt-header {
+        text-align: center;
+        border-bottom: 2px solid #000;
+        padding-bottom: 16px;
+        margin-bottom: 20px;
+        color: black;
+      }
+      
+      .receipt-header h1 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: bold;
+        color: black;
+      }
+      
+      .receipt-header p {
+        margin: 4px 0;
+        font-size: 12px;
+        color: black;
+      }
+      
+      .receipt-meta {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #ddd;
+        font-size: 13px;
+        color: black;
+      }
+      
+      .receipt-meta-row {
+        display: grid;
+        grid-template-columns: 120px 1fr;
+        gap: 8px;
+        color: black;
+      }
+      
+      .receipt-meta-label {
+        font-weight: bold;
+        color: black;
+      }
+      
+      .receipt-items {
+        margin: 20px 0;
+        color: black;
+      }
+      
+      .receipt-items-header {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr;
+        gap: 8px;
+        font-weight: bold;
+        border-bottom: 1px solid #000;
+        padding-bottom: 8px;
+        margin-bottom: 8px;
+        font-size: 12px;
+        color: black;
+      }
+      
+      .receipt-item {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr;
+        gap: 8px;
+        padding: 8px 0;
+        border-bottom: 1px solid #eee;
+        font-size: 12px;
+        color: black;
+      }
+      
+      .receipt-item-title {
+        font-weight: 500;
+        color: black;
+      }
+      
+      .receipt-item-sku {
+        font-size: 10px;
+        color: #333;
+      }
+      
+      .receipt-totals {
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 2px solid #000;
+        text-align: right;
+        font-size: 14px;
+        color: black;
+      }
+      
+      .receipt-total-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        color: black;
+      }
+      
+      .receipt-total-amount {
+        font-weight: bold;
+        font-size: 18px;
+        margin-top: 8px;
+        color: black;
+      }
+      
+      .receipt-footer {
+        text-align: center;
+        margin-top: 20px;
+        padding-top: 16px;
+        border-top: 1px solid #ddd;
+        font-size: 11px;
+        color: black;
+      }
+      
+      @media print {
+        body { margin: 0; padding: 0; }
+        .app-shell { display: none; }
+        .receipt-modal { display: flex; position: static; background: white; }
+        .receipt-container { max-width: 100%; max-height: 100%; border-radius: 0; }
+        .receipt-actions { display: none; }
+        .receipt-content { padding: 0; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <span class="brand-mark">E</span>
+          <span>Eyden Trading</span>
+        </div>
+
+        <nav class="menu" aria-label="Main navigation">
+          <a href="index.html"><span class="icon">⌂</span>Home</a>
+          <a href="create-bond.html"><span class="icon">＋</span>Create Bond</a>
+          <a href="products.html"><span class="icon">▦</span>Products</a>
+          <a href="customers.html"><span class="icon">◎</span>Customers</a>
+          <a href="orders.html"><span class="icon">◫</span>Orders</a>
+          <a href="reports.html" class="active"><span class="icon">◇</span>Reports</a>
+          <a href="settings.html"><span class="icon">⚙</span>Settings</a>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="user-card">
+            <div class="avatar">JT</div>
+            <div>
+              <strong>Jude T.</strong>
+              <small>Administrator</small>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main-panel">
+        <header class="topbar">
+          <div class="title" id="page-title">Reports</div>
+
+          <div class="toolbar">
+            <input type="text" id="search-orders" placeholder="Search orders..." style="padding:8px 12px;border:1px solid #ddd;border-radius:6px;width:200px"/>
+            <button class="secondary-btn" id="export-btn">Export PDF</button>
+          </div>
+        </header>
+
+        <section class="grid-2" style="margin-bottom: 18px;">
+          <div class="kpi-card">
+            <h3>Total Sales</h3>
+            <strong id="total-sales">Srd 0,00</strong>
+          </div>
+          <div class="kpi-card">
+            <h3>Orders Count</h3>
+            <strong id="orders-count">0</strong>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h3>Your Sales Report</h3>
+            <small id="salesperson-name"></small>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Amount</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="sales-tbody">
+              <tr>
+                <td colspan="6" style="text-align:center;padding:20px">Loading your sales...</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- Receipt/Bon Modal -->
+        <div id="receipt-modal" class="receipt-modal">
+          <div class="receipt-container">
+            <div class="receipt-actions">
+              <button id="receipt-print" class="secondary-btn">🖨️ Print</button>
+              <button id="receipt-export" class="secondary-btn">📥 Export PDF</button>
+              <button id="receipt-close" class="secondary-btn">✕ Close</button>
+            </div>
+            <div class="receipt-content" id="receipt-content">
+              <!-- Receipt content will be generated here -->
+            </div>
+          </div>
+        </div>
+
+        <script>
+          (function(){
+            const salespersonName = document.getElementById('salesperson-name');
+            const pageTitle = document.getElementById('page-title');
+            const totalSalesEl = document.getElementById('total-sales');
+            const ordersCountEl = document.getElementById('orders-count');
+            const salesTbody = document.getElementById('sales-tbody');
+            const searchInput = document.getElementById('search-orders');
+            const exportBtn = document.getElementById('export-btn');
+            const receiptModal = document.getElementById('receipt-modal');
+            const receiptContent = document.getElementById('receipt-content');
+            const receiptPrintBtn = document.getElementById('receipt-print');
+            const receiptExportBtn = document.getElementById('receipt-export');
+            const receiptCloseBtn = document.getElementById('receipt-close');
+
+            // Get current user from sidebar
+            const currentUser = document.querySelector('.user-card strong')?.textContent || 'Unknown Salesperson';
+            salespersonName.textContent = `Showing sales by ${currentUser}`;
+            pageTitle.textContent = `Reports - ${currentUser}`;
+
+            // Format currency
+            function fmt(n) { 
+              return 'Srd ' + (Number(n)||0).toFixed(2).replace('.',','); 
+            }
+
+            // Format date
+            function formatDate(isoString) {
+              const date = new Date(isoString);
+              return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+            }
+
+            // Generate receipt HTML
+            function generateReceipt(order) {
+              const total = order.items.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 0)), 0);
+              
+              return `
+                <div class="receipt-header">
+                  <h1>EYDEN TRADING</h1>
+                  <p>Sales Receipt / Bon de Vente</p>
+                </div>
+                
+                <div class="receipt-meta">
+                  <div>
+                    <div class="receipt-meta-row">
+                      <span class="receipt-meta-label">Order ID:</span>
+                      <span>${order.id}</span>
+                    </div>
+                    <div class="receipt-meta-row" style="margin-top: 8px;">
+                      <span class="receipt-meta-label">Date:</span>
+                      <span>${formatDate(order.date)}</span>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="receipt-meta-row">
+                      <span class="receipt-meta-label">Salesperson:</span>
+                      <span>${order.salesperson}</span>
+                    </div>
+                    <div class="receipt-meta-row" style="margin-top: 8px;">
+                      <span class="receipt-meta-label">Customer:</span>
+                      <span>${order.customer}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="receipt-items">
+                  <div class="receipt-items-header">
+                    <div>Product</div>
+                    <div style="text-align: right;">Price</div>
+                    <div style="text-align: center;">Qty</div>
+                    <div style="text-align: right;">Total</div>
+                  </div>
+                  
+                  ${order.items.map(item => {
+                    const lineTotal = (item.price || 0) * (item.quantity || 0);
+                    return `
+                      <div class="receipt-item">
+                        <div>
+                          <div class="receipt-item-title">${item.title}</div>
+                          <div class="receipt-item-sku">SKU: ${item.sku}</div>
+                        </div>
+                        <div style="text-align: right;">${fmt(item.price)}</div>
+                        <div style="text-align: center;">${item.quantity}</div>
+                        <div style="text-align: right;">${fmt(lineTotal)}</div>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+                
+                <div class="receipt-totals">
+                  <div class="receipt-total-row">
+                    <span>Subtotal:</span>
+                    <span>${fmt(total)}</span>
+                  </div>
+                  <div class="receipt-total-row">
+                    <span>Tax (0%):</span>
+                    <span>${fmt(0)}</span>
+                  </div>
+                  <div class="receipt-total-amount">
+                    <div class="receipt-total-row">
+                      <span>TOTAL:</span>
+                      <span>${fmt(total)}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="receipt-footer">
+                  <p>Thank you for your business!</p>
+                  <p>Merci pour votre commerce!</p>
+                  <p style="margin-top: 12px; color: #999; font-size: 10px;">
+                    ${new Date().toLocaleString()}
+                  </p>
+                </div>
+              `;
+            }
+
+            // Show receipt modal
+            function showReceipt(order) {
+              receiptContent.innerHTML = generateReceipt(order);
+              receiptModal.style.display = 'flex';
+            }
+
+            // Close receipt modal
+            receiptCloseBtn.addEventListener('click', () => {
+              receiptModal.style.display = 'none';
+            });
+
+            // Print receipt
+            receiptPrintBtn.addEventListener('click', () => {
+              window.print();
+            });
+
+            // Export to PDF (using print functionality)
+            receiptExportBtn.addEventListener('click', () => {
+              alert('Using browser print to PDF:\n1. Click Print button\n2. Select "Save as PDF" as printer\n3. Click Save');
+              window.print();
+            });
+
+            // Close modal when clicking outside
+            receiptModal.addEventListener('click', (e) => {
+              if(e.target === receiptModal) {
+                receiptModal.style.display = 'none';
+              }
+            });
+
+            // Load and display orders
+            function loadAndDisplayOrders(searchQuery = '') {
+              try {
+                const raw = localStorage.getItem('eyden_orders_v1');
+                const allOrders = raw ? JSON.parse(raw) : [];
+
+                // Filter by current salesperson
+                const myOrders = allOrders.filter(order => order.salesperson === currentUser);
+
+                // Apply search filter
+                let filteredOrders = myOrders;
+                if(searchQuery.trim()) {
+                  const q = searchQuery.toLowerCase();
+                  filteredOrders = myOrders.filter(order => 
+                    order.id.toLowerCase().includes(q) ||
+                    order.customer.toLowerCase().includes(q)
+                  );
+                }
+
+                // Sort by date descending
+                filteredOrders.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                // Update KPIs
+                const totalSales = filteredOrders.reduce((sum, order) => sum + (Number(order.total)||0), 0);
+                totalSalesEl.textContent = fmt(totalSales);
+                ordersCountEl.textContent = filteredOrders.length;
+
+                // Render table
+                if(filteredOrders.length === 0) {
+                  salesTbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#999">No sales found</td></tr>';
+                  return;
+                }
+
+                const rows = filteredOrders.map(order => {
+                  return `
+                    <tr>
+                      <td><strong>${order.id}</strong></td>
+                      <td>${order.customer}</td>
+                      <td>${fmt(order.total)}</td>
+                      <td>${formatDate(order.date)}</td>
+                      <td><span class="status success">Completed</span></td>
+                      <td><button class="small view-receipt-btn" data-order='${JSON.stringify(order)}'>View Receipt</button></td>
+                    </tr>
+                  `;
+                }).join('');
+
+                salesTbody.innerHTML = rows;
+
+                // Attach click listeners to view receipt buttons
+                document.querySelectorAll('.view-receipt-btn').forEach(btn => {
+                  btn.addEventListener('click', (e) => {
+                    const order = JSON.parse(e.target.dataset.order);
+                    showReceipt(order);
+                  });
+                });
+
+              } catch(e) {
+                console.error('Error loading orders', e);
+                salesTbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:red;padding:20px">Error loading orders</td></tr>';
+              }
+            }
+
+            // Search functionality
+            searchInput.addEventListener('input', (e) => {
+              loadAndDisplayOrders(e.target.value);
+            });
+
+            // Export all orders functionality
+            exportBtn.addEventListener('click', () => {
+              alert('Use the "View Receipt" button on each order to print or export individual receipts as PDF.');
+            });
+
+            // Initial load
+            loadAndDisplayOrders();
+          })();
+        </script>
+      </main>
+    </div>
+  </body>
+</html>

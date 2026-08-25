@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Eyden Trading | Login</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+          'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .login-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        width: 100%;
+        max-width: 420px;
+        padding: 40px;
+      }
+
+      .login-header {
+        text-align: center;
+        margin-bottom: 40px;
+      }
+
+      .login-logo {
+        font-size: 48px;
+        font-weight: bold;
+        margin-bottom: 12px;
+      }
+
+      .login-logo span {
+        color: #0066cc;
+      }
+
+      .login-title {
+        font-size: 28px;
+        font-weight: 700;
+        color: #1a2332;
+        margin-bottom: 8px;
+      }
+
+      .login-subtitle {
+        font-size: 14px;
+        color: #666;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #333;
+        font-size: 14px;
+      }
+
+      .form-group input {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+        font-family: inherit;
+        transition: all 0.3s;
+      }
+
+      .form-group input:focus {
+        outline: none;
+        border-color: #0066cc;
+        box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+      }
+
+      .form-group input::placeholder {
+        color: #999;
+      }
+
+      .remember-forgot {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        font-size: 13px;
+      }
+
+      .remember-forgot input[type="checkbox"] {
+        margin-right: 6px;
+        cursor: pointer;
+      }
+
+      .remember-forgot a {
+        color: #0066cc;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      .remember-forgot a:hover {
+        text-decoration: underline;
+      }
+
+      .login-btn {
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+
+      .login-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+      }
+
+      .login-btn:active {
+        transform: translateY(0);
+      }
+
+      .login-footer {
+        text-align: center;
+        margin-top: 24px;
+        font-size: 14px;
+        color: #666;
+      }
+
+      .login-footer a {
+        color: #0066cc;
+        text-decoration: none;
+      }
+
+      .login-footer a:hover {
+        text-decoration: underline;
+      }
+
+      .demo-credentials {
+        background: #f0f7ff;
+        border: 1px solid #cce5ff;
+        border-radius: 6px;
+        padding: 12px;
+        margin-bottom: 20px;
+        font-size: 12px;
+        color: #0066cc;
+      }
+
+      .demo-credentials strong {
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .error-message {
+        color: #dc3545;
+        background: #ffe6e6;
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        font-size: 13px;
+        display: none;
+      }
+
+      .success-message {
+        color: #28a745;
+        background: #e6f9f0;
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        font-size: 13px;
+        display: none;
+      }
+
+      .loading {
+        display: none;
+      }
+
+      .spinner {
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top: 2px solid white;
+        width: 16px;
+        height: 16px;
+        animation: spin 0.6s linear infinite;
+        display: inline-block;
+        margin-right: 8px;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-container">
+      <div class="login-header">
+        <div class="login-logo">
+          <span>E</span>T
+        </div>
+        <h1 class="login-title">Eyden Trading</h1>
+        <p class="login-subtitle">Welcome back to your sales dashboard</p>
+      </div>
+
+      <form id="login-form" onsubmit="handleLogin(event)">
+        <div class="error-message" id="error-message"></div>
+        <div class="success-message" id="success-message"></div>
+
+        <div class="demo-credentials">
+          <strong>Credentials:</strong>
+          Admin: eyden trading / admin<br />
+          Worker: worker
+        </div>
+
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input
+            type="text"
+            id="username"
+            placeholder="Enter admin or worker username"
+            required
+            autocomplete="username"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input
+            type="password"
+            id="password"
+            placeholder="Enter your password"
+            required
+            autocomplete="current-password"
+          />
+        </div>
+
+        <div class="remember-forgot">
+          <label>
+            <input type="checkbox" id="remember-me" />
+            Remember me
+          </label>
+          <a onclick="resetPassword()">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="login-btn">
+          <span class="loading"><div class="spinner"></div></span>
+          <span class="login-text">Sign In</span>
+        </button>
+      </form>
+
+      <div class="login-footer">
+        Don't have an account? <a onclick="alert('Contact your administrator to create an account')">Contact support</a>
+      </div>
+    </div>
+
+    <script>
+      function getValidUser(username, password) {
+        const storedUsers = (() => {
+          try {
+            const raw = localStorage.getItem('eyden_users');
+            if (!raw) return null;
+            const parsed = JSON.parse(raw);
+            return Array.isArray(parsed) ? parsed : null;
+          } catch (e) {
+            return null;
+          }
+        })();
+
+        const userList = storedUsers && storedUsers.length ? storedUsers : (window.appUsers || [
+          { username: 'admin', password: 'xavemi77', name: 'Eyden Trading', role: 'Administrator', type: 'admin', avatar: 'ET' },
+          { username: 'eyden trading', password: 'xavemi77', name: 'Eyden Trading', role: 'Administrator', type: 'admin', avatar: 'ET' },
+          { username: 'worker', password: 'xavemi77', name: 'Worker', role: 'Worker', type: 'worker', avatar: 'W' }
+        ]);
+
+        const normalizedUsername = String(username || '').trim().toLowerCase();
+        const normalizedPassword = String(password || '');
+
+        if (!normalizedUsername || !normalizedPassword) return null;
+
+        return userList.find((user) => {
+          const usernameMatches = [
+            user.username,
+            user.name,
+            user.type,
+            user.role
+          ].some((value) => String(value || '').trim().toLowerCase() === normalizedUsername);
+
+          return usernameMatches && user.password === normalizedPassword;
+        }) || null;
+      }
+
+      window.addEventListener('load', () => {
+        const userSession = localStorage.getItem('user_session');
+        if (userSession) {
+          window.location.href = 'admin-dashboard.html';
+        }
+
+        const remembered = localStorage.getItem('remember_username');
+        if (remembered) {
+          document.getElementById('username').value = remembered;
+          document.getElementById('password').focus();
+        }
+      });
+
+      function handleLogin(e) {
+        e.preventDefault();
+
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+        const rememberMe = document.getElementById('remember-me').checked;
+        const errorMsg = document.getElementById('error-message');
+        const successMsg = document.getElementById('success-message');
+        const loginBtn = document.querySelector('.login-btn');
+        const loadingSpinner = loginBtn.querySelector('.loading');
+
+        errorMsg.style.display = 'none';
+        successMsg.style.display = 'none';
+        loadingSpinner.style.display = 'inline';
+        loginBtn.disabled = true;
+
+        setTimeout(() => {
+          const user = getValidUser(username, password);
+
+          if (user) {
+            try {
+              const userSession = {
+                username: user.username,
+                name: user.name,
+                role: user.role,
+                type: user.type,
+                loginTime: new Date().toISOString(),
+                avatar: user.avatar || user.name.slice(0, 2).toUpperCase()
+              };
+
+              localStorage.setItem('user_session', JSON.stringify(userSession));
+              const storedUsers = (() => {
+                try {
+                  const raw = localStorage.getItem('eyden_users');
+                  if (!raw) return null;
+                  const parsed = JSON.parse(raw);
+                  return Array.isArray(parsed) ? parsed : null;
+                } catch (e) {
+                  return null;
+                }
+              })();
+
+              localStorage.setItem('eyden_users', JSON.stringify(storedUsers && storedUsers.length ? storedUsers : (window.appUsers || [
+                { username: 'admin', password: 'xavemi77', name: 'Eyden Trading', role: 'Administrator', type: 'admin', avatar: 'ET' },
+                { username: 'eyden trading', password: 'xavemi77', name: 'Eyden Trading', role: 'Administrator', type: 'admin', avatar: 'ET' },
+                { username: 'worker', password: 'xavemi77', name: 'Worker', role: 'Worker', type: 'worker', avatar: 'W' }
+              ])));
+
+              if (rememberMe) {
+                localStorage.setItem('remember_username', username);
+              } else {
+                localStorage.removeItem('remember_username');
+              }
+
+              successMsg.textContent = `✅ Welcome ${user.name}! Redirecting...`;
+              successMsg.style.display = 'block';
+
+              setTimeout(() => {
+                window.location.href = 'admin-dashboard.html';
+              }, 800);
+            } catch (e) {
+              errorMsg.textContent = '❌ Could not save the session to this device. Please try again.';
+              errorMsg.style.display = 'block';
+              loadingSpinner.style.display = 'none';
+              loginBtn.disabled = false;
+            }
+          } else {
+            errorMsg.textContent = '❌ Invalid username or password. Please try again.';
+            errorMsg.style.display = 'block';
+            loadingSpinner.style.display = 'none';
+            loginBtn.disabled = false;
+          }
+        }, 600);
+      }
+
+      function resetPassword() {
+        alert('Please contact your administrator to reset the password.');
+      }
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          document.getElementById('login-form').requestSubmit();
+        }
+      });
+    </script>
+
+    <script src="auth.js"></script>
+  </body>
+</html>

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Eyden Trading | New Order</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      .form-row{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+      .form-row label{min-width:120px}
+      .order-items{border:1px solid #eee;border-radius:8px;padding:8px}
+      .order-item{display:grid;grid-template-columns:1fr 90px 120px;gap:12px;padding:8px 0;border-bottom:1px solid #f6f6f6}
+      .order-item:last-child{border-bottom:none}
+      .small{padding:6px 8px;font-size:13px}
+      .muted{color:#666}
+    </style>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <span class="brand-mark">E</span>
+          <span>Eyden Trading</span>
+        </div>
+
+        <nav class="menu" aria-label="Main navigation">
+          <a href="index.html"><span class="icon">⌂</span>Home</a>
+          <a href="create-bond.html"><span class="icon">＋</span>Create Bond</a>
+          <a href="products.html"><span class="icon">▦</span>Products</a>
+          <a href="customers.html"><span class="icon">◎</span>Customers</a>
+          <a href="orders.html"><span class="icon">◫</span>Orders</a>
+          <a href="reports.html"><span class="icon">◇</span>Reports</a>
+          <a href="settings.html"><span class="icon">⚙</span>Settings</a>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="user-card">
+            <div class="avatar">JT</div>
+            <div>
+              <strong>Jude T.</strong>
+              <small>Administrator</small>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main-panel">
+        <header class="topbar">
+          <div class="title">Nieuw Order</div>
+
+          <div class="toolbar">
+            <a href="orders.html" class="secondary-btn">← Terug</a>
+            <button id="import-cart" class="secondary-btn">Import from Catalog</button>
+            <button id="save-order" class="primary-btn">Save Order</button>
+          </div>
+        </header>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h3>Order maken</h3>
+          </div>
+
+          <div style="padding:16px">
+            <div class="form-row">
+              <label for="customer-select">Klant</label>
+              <select id="customer-select">
+                <option value="">-- Selecteer klant --</option>
+                <option value="20115">CHEN LU YA MEI (20115)</option>
+                <option value="20122">MARIO MENDOZA (20122)</option>
+                <option value="20131">JULIA DENNIS (20131)</option>
+                <option value="20146">PAUL SMITH (20146)</option>
+                <option value="20158">ANITA GROOT (20158)</option>
+              </select>
+            </div>
+
+            <div class="form-row">
+              <label for="salesperson-input">Verkoper</label>
+              <input id="salesperson-input" type="text" placeholder="Naam verkoper" />
+            </div>
+
+            <div class="form-row">
+              <label>Datum</label>
+              <div id="order-date" class="muted"></div>
+            </div>
+
+            <hr />
+
+            <h4>Items</h4>
+
+            <div style="display:flex;gap:12px;margin-bottom:12px;align-items:center">
+              <div style="flex:1">
+                <input id="manual-sku" placeholder="SKU" style="width:120px" />
+                <input id="manual-title" placeholder="Title" style="width:220px;margin-left:8px" />
+                <input id="manual-price" placeholder="Price" style="width:120px;margin-left:8px" />
+                <input id="manual-qty" placeholder="Qty" style="width:80px;margin-left:8px" />
+                <button id="add-manual" class="small" style="margin-left:8px">Add</button>
+              </div>
+            </div>
+
+            <div class="order-items" id="order-items">
+              <div class="muted">No items yet.</div>
+            </div>
+
+            <div style="display:flex;justify-content:flex-end;align-items:center;margin-top:12px;gap:16px">
+              <div class="muted">Subtotaal:</div>
+              <div id="subtotal">Srd 0,00</div>
+            </div>
+
+            <div style="display:flex;justify-content:flex-end;align-items:center;margin-top:8px;gap:16px">
+              <div class="muted">Totaal:</div>
+              <div id="total">Srd 0,00</div>
+            </div>
+
+            <div style="margin-top:18px;display:flex;gap:8px;justify-content:flex-end">
+              <button id="cancel-order" class="secondary-btn">Annuleer</button>
+              <button id="confirm-order" class="primary-btn">Bevestig & Save</button>
+            </div>
+          </div>
+        </section>
+        </section>
+
+        <!-- Review modal -->
+        <div id="review-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);align-items:center;justify-content:center;">
+          <div style="background:#fff;border-radius:8px;width:90%;max-width:900px;padding:16px;max-height:80vh;overflow:auto;">
+            <h3>Order Review</h3>
+            <div id="review-meta" style="margin-bottom:12px"></div>
+            <div id="review-items" style="margin-bottom:12px"></div>
+            <div style="display:flex;justify-content:flex-end;gap:8px">
+              <button id="review-edit" class="secondary-btn">Bewerken</button>
+              <button id="review-confirm" class="primary-btn">Bevestig en Opslaan</button>
+            </div>
+          </div>
+        </div>
+
+        <script src="cart.js"></script>
+        <script>
+          (function(){
+            const customerSelect = document.getElementById('customer-select');
+            const dateEl = document.getElementById('order-date');
+            const salespersonInput = document.getElementById('salesperson-input');
+            const itemsContainer = document.getElementById('order-items');
+            const subtotalEl = document.getElementById('subtotal');
+            const totalEl = document.getElementById('total');
+            const importBtn = document.getElementById('import-cart');
+            const addManualBtn = document.getElementById('add-manual');
+            const confirmBtn = document.getElementById('confirm-order');
+            const cancelBtn = document.getElementById('cancel-order');
+            const reviewModal = document.getElementById('review-modal');
+            const reviewMeta = document.getElementById('review-meta');
+            const reviewItems = document.getElementById('review-items');
+            const reviewConfirm = document.getElementById('review-confirm');
+            const reviewEdit = document.getElementById('review-edit');
+
+            // initial data
+            let items = [];
+            const salesperson = document.querySelector('.user-card strong')?.textContent || 'Unknown';
+            salespersonInput.value = salesperson;
+            dateEl.textContent = new Date().toLocaleString();
+
+            // Check if customer was selected from create-bond page
+            try {
+              const selectedCustomer = JSON.parse(localStorage.getItem('selected_customer'));
+              if(selectedCustomer && selectedCustomer.id) {
+                customerSelect.value = selectedCustomer.id;
+              }
+            } catch(e) {
+              console.warn('Could not load selected customer');
+            }
+
+            function fmt(n){ return 'Srd ' + (Number(n)||0).toFixed(2).replace('.',','); }
+
+            function renderItems(){
+              if(!items || items.length===0){ itemsContainer.innerHTML = '<div class="muted">No items yet.</div>'; subtotalEl.textContent = fmt(0); totalEl.textContent = fmt(0); return; }
+              const html = items.map(it=>{
+                const line = (it.price||0)*(it.quantity||0);
+                return `<div class="order-item" data-sku="${it.sku}">
+                  <div>
+                    <div style="font-weight:600">${it.title||''}</div>
+                    <div class="muted">SKU ${it.sku||''}</div>
+                  </div>
+                  <div style="text-align:right">${fmt(it.price)}</div>
+                  <div style="display:flex;gap:8px;justify-content:flex-end;align-items:center">
+                    <button class="dec small">−</button>
+                    <span class="qty">${it.quantity}</span>
+                    <button class="inc small">+</button>
+                    <button class="remove small" style="margin-left:8px">Remove</button>
+                    <div style="min-width:120px;text-align:right;margin-left:12px">${fmt(line)}</div>
+                  </div>
+                </div>`;
+              }).join('');
+              itemsContainer.innerHTML = html;
+              updateTotals();
+
+              itemsContainer.querySelectorAll('.order-item').forEach(el=>{
+                const sku = el.dataset.sku;
+                el.querySelector('.dec').addEventListener('click', ()=>{ changeQty(sku, -1); });
+                el.querySelector('.inc').addEventListener('click', ()=>{ changeQty(sku, +1); });
+                el.querySelector('.remove').addEventListener('click', ()=>{ removeItem(sku); });
+              });
+            }
+
+            function updateTotals(){
+              const subtotal = items.reduce((s,it)=>s + (it.price||0)*(it.quantity||0),0);
+              subtotalEl.textContent = fmt(subtotal);
+              totalEl.textContent = fmt(subtotal); // no taxes for now
+            }
+
+            function changeQty(sku, delta){
+              const idx = items.findIndex(x=>x.sku===sku);
+              if(idx===-1) return;
+              items[idx].quantity = Math.max(0, (parseInt(items[idx].quantity,10)||0) + delta);
+              if(items[idx].quantity===0) items.splice(idx,1);
+              renderItems();
+            }
+
+            function removeItem(sku){ items = items.filter(x=>x.sku!==sku); renderItems(); }
+
+            importBtn.addEventListener('click', ()=>{
+              const cartItems = window.Cart.getItemsArray();
+              if(!cartItems || cartItems.length===0){ alert('Cart is empty'); return; }
+              // merge into items (override qty if same sku)
+              cartItems.forEach(ci=>{
+                const exist = items.find(x=>x.sku===ci.sku);
+                if(exist) exist.quantity = (exist.quantity||0) + (ci.quantity||0);
+                else items.push({ sku:ci.sku, title:ci.title, price:ci.price, quantity:ci.quantity });
+              });
+              renderItems();
+            });
+
+            addManualBtn.addEventListener('click', ()=>{
+              const sku = document.getElementById('manual-sku').value.trim();
+              const title = document.getElementById('manual-title').value.trim();
+              const price = parseFloat(document.getElementById('manual-price').value) || 0;
+              const qty = parseInt(document.getElementById('manual-qty').value,10) || 0;
+              if(!sku || !title || qty<=0){ alert('Enter SKU, title and qty>0'); return; }
+              const exist = items.find(x=>x.sku===sku);
+              if(exist) exist.quantity += qty; else items.push({ sku, title: title.toUpperCase(), price, quantity: qty });
+              document.getElementById('manual-sku').value='';document.getElementById('manual-title').value='';document.getElementById('manual-price').value='';document.getElementById('manual-qty').value='';
+              renderItems();
+            });
+
+            // show review modal before final save
+            confirmBtn.addEventListener('click', ()=>{
+              const customer = customerSelect.value;
+              if(!customer){ alert('Select a customer'); return; }
+              if(items.length===0){ alert('Add at least one item'); return; }
+              // populate review
+              const metaHtml = `<div><strong>Klant:</strong> ${customer} &nbsp; <strong>Verkoper:</strong> ${salespersonInput.value || salesperson} &nbsp; <strong>Datum:</strong> ${new Date().toLocaleString()}</div>`;
+              reviewMeta.innerHTML = metaHtml;
+              const rows = items.map(it=>{
+                const line = (Number(it.price)||0) * (Number(it.quantity)||0);
+                return `<div style="display:grid;grid-template-columns:1fr 90px 80px 120px;gap:12px;padding:6px 0;border-bottom:1px solid #f6f6f6;"><div>${it.title} <div class="muted">SKU ${it.sku||''}</div></div><div style="text-align:right">${fmt(it.price)}</div><div style="text-align:center">${it.quantity}</div><div style="text-align:right">${fmt(line)}</div></div>`;
+              }).join('');
+              reviewItems.innerHTML = `<div style="font-weight:600;display:grid;grid-template-columns:1fr 90px 80px 120px;gap:12px;padding:6px 0;border-bottom:2px solid #ddd;"><div>Product</div><div style="text-align:right">Prijs</div><div style="text-align:center">Aantal</div><div style="text-align:right">Lijn</div></div>${rows}<div style="display:flex;justify-content:flex-end;margin-top:8px"><strong>Totaal: ${fmt(items.reduce((s,it)=>s + (Number(it.price)||0)*(Number(it.quantity)||0),0))}</strong></div>`;
+              reviewModal.style.display = 'flex';
+            });
+
+            reviewEdit.addEventListener('click', ()=>{ reviewModal.style.display='none'; });
+
+            reviewConfirm.addEventListener('click', ()=>{
+              // finalize save
+              const customer = customerSelect.value;
+              const orderId = 'ORD-' + Date.now();
+              const dateIso = new Date().toISOString();
+              const finalItems = items.map(it => ({ sku: it.sku, title: it.title, price: Number(it.price)||0, quantity: Number(it.quantity)||0, lineTotal: (Number(it.price)||0)*(Number(it.quantity)||0), image: it.image||'' }));
+              const total = finalItems.reduce((s,it)=>s + it.lineTotal, 0);
+              const order = { id: orderId, date: dateIso, customer, items: finalItems, total, salesperson: (salespersonInput.value || salesperson) };
+              try{
+                const raw = localStorage.getItem('eyden_orders_v1');
+                const arr = raw ? JSON.parse(raw) : [];
+                arr.push(order);
+                localStorage.setItem('eyden_orders_v1', JSON.stringify(arr));
+              }catch(e){ console.warn('save order failed', e); }
+
+              // clear draft and optionally clear cart
+              localStorage.removeItem('eyden_order_draft');
+              if(confirm('Order opgeslagen. Wil je de winkelwagen ook leegmaken?')) window.Cart.clear();
+              reviewModal.style.display='none';
+              alert('Order geslaagd: ' + orderId);
+              window.location.href = 'orders.html';
+            });
+
+            cancelBtn.addEventListener('click', ()=>{ if(confirm('Annuleer en ga terug?')) window.location.href='orders.html'; });
+
+            // import any draft items created by "Toevoegen" on product page
+            (function(){
+              try{
+                const raw = localStorage.getItem('eyden_order_draft');
+                if(raw){
+                  const draftObj = JSON.parse(raw);
+                  Object.keys(draftObj||{}).forEach(sku=>{
+                    const d = draftObj[sku];
+                    const exist = items.find(x=>x.sku===d.sku);
+                    if(exist) exist.quantity = (exist.quantity||0) + (d.quantity||0);
+                    else items.push({ sku:d.sku, title:d.title, price:d.price, quantity:d.quantity, image:d.image });
+                  });
+                  // clear draft after importing
+                  localStorage.removeItem('eyden_order_draft');
+                }
+              }catch(e){ console.warn('import draft failed', e); }
+            })();
+
+            // initial render
+            renderItems();
+          })();
+        </script>
+      </main>
+    </div>
+  </body>
+</html>
