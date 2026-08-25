@@ -1058,6 +1058,10 @@
                   <input id="new-product-image" type="file" accept="image/*" />
                 </div>
                 <div class="admin-product-form-field">
+                  <label for="new-product-image-url">Or Image URL</label>
+                  <input id="new-product-image-url" type="url" placeholder="https://example.com/photo.jpg" />
+                </div>
+                <div class="admin-product-form-field">
                   <label for="new-product-stock">Stock</label>
                   <select id="new-product-stock">
                     <option value="true">In stock</option>
@@ -2075,6 +2079,7 @@
           const title = document.getElementById('new-product-name').value.trim();
           const price = Number(document.getElementById('new-product-price').value);
           const imageFile = document.getElementById('new-product-image').files[0];
+          const imageUrl = document.getElementById('new-product-image-url').value.trim();
           const inStock = document.getElementById('new-product-stock').value === 'true';
 
           if (!sku || !title || !Number.isFinite(price)) {
@@ -2091,9 +2096,14 @@
 
           let image = '';
           try {
-            image = await readImageFile(imageFile);
+            image = imageFile ? await readImageFile(imageFile) : imageUrl;
           } catch (error) {
             alert('The product photo could not be read. Please choose another image.');
+            return;
+          }
+
+          if (imageUrl && !imageFile && !/^https?:\/\//i.test(imageUrl)) {
+            alert('Please enter a valid image URL starting with http:// or https://.');
             return;
           }
 
