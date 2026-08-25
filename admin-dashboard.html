@@ -378,12 +378,6 @@
         margin-bottom: 20px;
       }
 
-      .admin-products-toolbar-actions {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
       .admin-add-product-btn {
         border: none;
         border-radius: 8px;
@@ -1042,24 +1036,8 @@
           <section id="products-section" class="admin-section">
             <div class="admin-products-toolbar">
               <h3 style="margin: 0; color: #1a2332;">Products</h3>
-              <div class="admin-products-toolbar-actions">
-                <button type="button" id="toggle-category-form" class="action-btn">+ Category</button>
-                <button type="button" id="toggle-add-product" class="admin-add-product-btn">+ Add Product</button>
-              </div>
+              <button type="button" id="toggle-add-product" class="admin-add-product-btn">+ Add Product</button>
             </div>
-
-            <form id="admin-category-form" class="admin-product-form">
-              <div class="admin-product-form-grid">
-                <div class="admin-product-form-field">
-                  <label for="new-category-name">Category Name</label>
-                  <input id="new-category-name" type="text" placeholder="Vegetables" required />
-                </div>
-              </div>
-              <div class="admin-product-form-actions">
-                <button type="button" id="cancel-category" class="action-btn">Cancel</button>
-                <button type="submit" class="admin-add-product-btn">Add Category</button>
-              </div>
-            </form>
 
             <form id="admin-product-form" class="admin-product-form">
               <div class="admin-product-form-grid">
@@ -1070,10 +1048,6 @@
                 <div class="admin-product-form-field">
                   <label for="new-product-name">Product Name</label>
                   <input id="new-product-name" type="text" placeholder="Bananas" required />
-                </div>
-                <div class="admin-product-form-field">
-                  <label for="new-product-category">Category</label>
-                  <select id="new-product-category"></select>
                 </div>
                 <div class="admin-product-form-field">
                   <label for="new-product-price">Price</label>
@@ -1108,10 +1082,6 @@
                 <div class="admin-product-form-field">
                   <label for="edit-product-name">Product Name</label>
                   <input id="edit-product-name" type="text" required />
-                </div>
-                <div class="admin-product-form-field">
-                  <label for="edit-product-category">Category</label>
-                  <select id="edit-product-category"></select>
                 </div>
                 <div class="admin-product-form-field">
                   <label for="edit-product-price">Price</label>
@@ -1696,39 +1666,14 @@
       }
 
       function saveProducts(products) {
-        localStorage.setItem('eyden_products_v1', JSON.stringify(products));
-      }
-
-      function getCategories() {
         try {
-          const raw = localStorage.getItem('eyden_categories_v1');
-          if (raw) {
-            const parsed = JSON.parse(raw);
-            if (Array.isArray(parsed) && parsed.length) return parsed;
-          }
-        } catch (e) {
-          console.warn('Could not read categories list', e);
+          localStorage.setItem('eyden_products_v1', JSON.stringify(products));
+          return true;
+        } catch (error) {
+          console.error('Could not save products list', error);
+          alert('Product could not be saved because browser storage is full. Use a smaller photo or an image URL.');
+          return false;
         }
-
-        const defaultCategories = ['General'];
-        localStorage.setItem('eyden_categories_v1', JSON.stringify(defaultCategories));
-        return defaultCategories;
-      }
-
-      function saveCategories(categories) {
-        localStorage.setItem('eyden_categories_v1', JSON.stringify(categories));
-      }
-
-      function populateCategoryOptions() {
-        const categories = getCategories();
-        ['new-product-category', 'edit-product-category'].forEach((id) => {
-          const select = document.getElementById(id);
-          if (!select) return;
-
-          const currentValue = select.value;
-          select.innerHTML = categories.map((category) => `<option value="${category}">${category}</option>`).join('');
-          if (categories.includes(currentValue)) select.value = currentValue;
-        });
       }
 
       function readImageFile(file) {
@@ -1736,7 +1681,25 @@
 
         return new Promise((resolve, reject) => {
           const reader = new FileReader();
-          reader.addEventListener('load', () => resolve(String(reader.result || '')));
+          reader.addEventListener('load', () => {
+            const image = new Image();
+            image.addEventListener('load', () => {
+              const maxSize = 900;
+              const scale = Math.min(1, maxSize / Math.max(image.naturalWidth, image.naturalHeight));
+              const canvas = document.createElement('canvas');
+              canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+              canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+              const context = canvas.getContext('2d');
+              if (!context) {
+                reject(new Error('Could not process image.'));
+                return;
+              }
+              context.drawImage(image, 0, 0, canvas.width, canvas.height);
+              resolve(canvas.toDataURL('image/jpeg', 0.75));
+            });
+            image.addEventListener('error', () => reject(new Error('Could not decode image.')));
+            image.src = String(reader.result || '');
+          });
           reader.addEventListener('error', () => reject(new Error('Could not read image file.')));
           reader.readAsDataURL(file);
         });
@@ -1758,7 +1721,6 @@
             <div class="admin-product-info">
               <div class="admin-product-code">${product.sku}</div>
               <h3 class="admin-product-title">${product.title}</h3>
-              <div class="admin-product-code">${product.category || 'General'}</div>
               <div class="admin-product-price-row">
                 <span class="admin-product-price">Srd ${Number(product.price || 0).toFixed(2).replace('.', ',')}</span>
                 <span class="admin-stock-badge ${product.inStock ? 'in-stock' : 'out-of-stock'}">${product.inStock ? 'In stock' : 'Out of stock'}</span>
@@ -1781,8 +1743,6 @@
             document.getElementById('edit-product-original-sku').value = product.sku;
             document.getElementById('edit-product-sku').value = product.sku;
             document.getElementById('edit-product-name').value = product.title;
-            populateCategoryOptions();
-            document.getElementById('edit-product-category').value = product.category || 'General';
             document.getElementById('edit-product-price').value = product.price;
             document.getElementById('edit-product-image').value = product.image || '';
             document.getElementById('edit-product-stock').value = String(product.inStock);
@@ -2093,46 +2053,6 @@
       const toggleAddProductBtn = document.getElementById('toggle-add-product');
       const adminProductForm = document.getElementById('admin-product-form');
       const cancelAddProductBtn = document.getElementById('cancel-add-product');
-      const toggleCategoryFormBtn = document.getElementById('toggle-category-form');
-      const adminCategoryForm = document.getElementById('admin-category-form');
-      const cancelCategoryBtn = document.getElementById('cancel-category');
-
-      populateCategoryOptions();
-
-      if (toggleCategoryFormBtn && adminCategoryForm) {
-        toggleCategoryFormBtn.addEventListener('click', () => {
-          adminCategoryForm.classList.toggle('active');
-        });
-      }
-
-      if (cancelCategoryBtn && adminCategoryForm) {
-        cancelCategoryBtn.addEventListener('click', () => {
-          adminCategoryForm.reset();
-          adminCategoryForm.classList.remove('active');
-        });
-      }
-
-      if (adminCategoryForm) {
-        adminCategoryForm.addEventListener('submit', (event) => {
-          event.preventDefault();
-
-          const category = document.getElementById('new-category-name').value.trim();
-          if (!category) return;
-
-          const categories = getCategories();
-          if (categories.some((item) => item.toLowerCase() === category.toLowerCase())) {
-            alert('That category already exists.');
-            return;
-          }
-
-          categories.push(category);
-          saveCategories(categories);
-          populateCategoryOptions();
-          document.getElementById('new-product-category').value = category;
-          adminCategoryForm.reset();
-          adminCategoryForm.classList.remove('active');
-        });
-      }
 
       if (toggleAddProductBtn && adminProductForm) {
         toggleAddProductBtn.addEventListener('click', () => {
@@ -2153,7 +2073,6 @@
 
           const sku = document.getElementById('new-product-sku').value.trim();
           const title = document.getElementById('new-product-name').value.trim();
-          const category = document.getElementById('new-product-category').value || 'General';
           const price = Number(document.getElementById('new-product-price').value);
           const imageFile = document.getElementById('new-product-image').files[0];
           const inStock = document.getElementById('new-product-stock').value === 'true';
@@ -2181,14 +2100,13 @@
           const newProduct = {
             sku,
             title,
-            category,
             price,
             image: image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=500&q=80',
             inStock
           };
 
           products.push(newProduct);
-          saveProducts(products);
+          if (!saveProducts(products)) return;
           renderAdminProducts();
           adminProductForm.reset();
           adminProductForm.classList.remove('active');
@@ -2260,7 +2178,6 @@
             ...products[productIndex],
             sku,
             title,
-            category: document.getElementById('edit-product-category').value || 'General',
             price,
             image: image || products[productIndex].image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=500&q=80',
             inStock
