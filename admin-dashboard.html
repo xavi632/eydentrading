@@ -1101,6 +1101,7 @@
               </div>
 
               <div class="admin-product-form-actions">
+                <button type="button" id="delete-product" class="delete-user-btn">Delete Product</button>
                 <button type="button" id="cancel-edit-product" class="action-btn">Cancel</button>
                 <button type="submit" class="admin-add-product-btn">Update Product</button>
               </div>
@@ -1654,7 +1655,7 @@
           const raw = localStorage.getItem('eyden_products_v1');
           if (raw) {
             const parsed = JSON.parse(raw);
-            if (Array.isArray(parsed) && parsed.length) return parsed;
+            if (Array.isArray(parsed)) return parsed;
           }
         } catch (e) {
           console.warn('Could not read products list', e);
@@ -2089,11 +2090,33 @@
 
       const editProductForm = document.getElementById('admin-edit-product-form');
       const cancelEditProductBtn = document.getElementById('cancel-edit-product');
+      const deleteProductBtn = document.getElementById('delete-product');
 
       if (cancelEditProductBtn && editProductForm) {
         cancelEditProductBtn.addEventListener('click', () => {
           editProductForm.classList.remove('active');
           editProductForm.reset();
+        });
+      }
+
+      if (deleteProductBtn && editProductForm) {
+        deleteProductBtn.addEventListener('click', () => {
+          const productSku = document.getElementById('edit-product-original-sku').value.trim();
+          const products = getProducts();
+          const product = products.find((item) => item.sku === productSku);
+          if (!product) {
+            alert('Product not found.');
+            return;
+          }
+
+          const confirmDelete = window.confirm(`Are you sure you want to delete "${product.title}"?`);
+          if (!confirmDelete) return;
+
+          saveProducts(products.filter((item) => item.sku !== productSku));
+          renderAdminProducts();
+          populateSaleProductOptions();
+          editProductForm.reset();
+          editProductForm.classList.remove('active');
         });
       }
 
