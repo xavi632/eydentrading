@@ -222,18 +222,17 @@
 
         <div class="demo-credentials">
           <strong>Credentials:</strong>
-          Admin: eyden trading / admin<br />
-          Worker: worker
+          Use your Supabase account email and password.
         </div>
 
         <div class="form-group">
-          <label for="username">Username</label>
+          <label for="username">Email</label>
           <input
-            type="text"
+            type="email"
             id="username"
-            placeholder="Enter admin or worker username"
+            placeholder="Enter your email address"
             required
-            autocomplete="username"
+            autocomplete="email"
           />
         </div>
 
@@ -267,59 +266,79 @@
       </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-      function getValidUser(username, password) {
-        const storedUsers = (() => {
-          try {
-            const raw = localStorage.getItem('eyden_users');
-            if (!raw) return null;
-            const parsed = JSON.parse(raw);
-            return Array.isArray(parsed) ? parsed : null;
-          } catch (e) {
-            return null;
-          }
-        })();
+      const SUPABASE_URL = 'https://egzgmtierpztzrrefeos.supabase.co';
+      const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_Ln5qJKlIQQIQGxQMx6gy8w_4D70sX2i';
+      const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
-        const userList = storedUsers && storedUsers.length ? storedUsers : (window.appUsers || [
-          { username: 'admin', password: 'xavemi77', name: 'Eyden Trading', role: 'Administrator', type: 'admin', avatar: 'ET' },
-          { username: 'eyden trading', password: 'xavemi77', name: 'Eyden Trading', role: 'Administrator', type: 'admin', avatar: 'ET' },
-          { username: 'worker', password: 'xavemi77', name: 'Worker', role: 'Worker', type: 'worker', avatar: 'W' }
-        ]);
-
-        const normalizedUsername = String(username || '').trim().toLowerCase();
-        const normalizedPassword = String(password || '');
-
-        if (!normalizedUsername || !normalizedPassword) return null;
-
-        return userList.find((user) => {
-          const usernameMatches = [
-            user.username,
-            user.name,
-            user.type,
-            user.role
-          ].some((value) => String(value || '').trim().toLowerCase() === normalizedUsername);
-
-          return usernameMatches && user.password === normalizedPassword;
-        }) || null;
+      function showLoginError(message) {
+        const errorMsg = document.getElementById('error-message');
+        errorMsg.textContent = `❌ ${message}`;
+        errorMsg.style.display = 'block';
       }
 
-      window.addEventListener('load', () => {
-        const userSession = localStorage.getItem('user_session');
-        if (userSession) {
-          window.location.href = 'admin-dashboard.html';
+      async function getProfileAndRedirect(user) {
+        const { data: profile, error } = await supabaseClient
+          .from('profiles')
+          .select('role, status')
+          .eq('id', user.id)
+          .single();
+
+        if (error || !profile) {
+          await supabaseClient.auth.signOut();
+          throw new Error('Your account profile could not be found. Please contact your administrator.');
         }
 
+        const role = String(profile.role || '').trim().toLowerCase();
+        const status = String(profile.status || '').trim().toLowerCase();
+
+        if (status !== 'active') {
+          await supabaseClient.auth.signOut();
+          throw new Error('Your account is inactive. Please contact your administrator.');
+        }
+
+        const destination = role === 'admin' ? 'admin-dashboard.html' : role === 'worker' ? 'worker-dashboard.html' : null;
+        if (!destination) {
+          await supabaseClient.auth.signOut();
+          throw new Error('Your account does not have permission to access this website.');
+        }
+
+        localStorage.setItem('user_session', JSON.stringify({
+          id: user.id,
+          authProvider: 'supabase',
+          username: user.email,
+          name: user.user_metadata?.name || user.email,
+          role,
+          type: role,
+          loginTime: new Date().toISOString(),
+          avatar: (user.user_metadata?.name || user.email).slice(0, 2).toUpperCase()
+        }));
+
+        return destination;
+      }
+
+      window.addEventListener('load', async () => {
         const remembered = localStorage.getItem('remember_username');
         if (remembered) {
           document.getElementById('username').value = remembered;
           document.getElementById('password').focus();
         }
+
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (session?.user) {
+          try {
+            window.location.href = await getProfileAndRedirect(session.user);
+          } catch (error) {
+            showLoginError(error.message);
+          }
+        }
       });
 
-      function handleLogin(e) {
+      async function handleLogin(e) {
         e.preventDefault();
 
-        const username = document.getElementById('username').value.trim();
+        const email = document.getElementById('username').value.trim();
         const password = document.getElementById('password').value;
         const rememberMe = document.getElementById('remember-me').checked;
         const errorMsg = document.getElementById('error-message');
@@ -332,63 +351,25 @@
         loadingSpinner.style.display = 'inline';
         loginBtn.disabled = true;
 
-        setTimeout(() => {
-          const user = getValidUser(username, password);
+        try {
+          const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+          if (error) throw new Error('Incorrect email or password. Please try again.');
 
-          if (user) {
-            try {
-              const userSession = {
-                username: user.username,
-                name: user.name,
-                role: user.role,
-                type: user.type,
-                loginTime: new Date().toISOString(),
-                avatar: user.avatar || user.name.slice(0, 2).toUpperCase()
-              };
-
-              localStorage.setItem('user_session', JSON.stringify(userSession));
-              const storedUsers = (() => {
-                try {
-                  const raw = localStorage.getItem('eyden_users');
-                  if (!raw) return null;
-                  const parsed = JSON.parse(raw);
-                  return Array.isArray(parsed) ? parsed : null;
-                } catch (e) {
-                  return null;
-                }
-              })();
-
-              localStorage.setItem('eyden_users', JSON.stringify(storedUsers && storedUsers.length ? storedUsers : (window.appUsers || [
-                { username: 'admin', password: 'xavemi77', name: 'Eyden Trading', role: 'Administrator', type: 'admin', avatar: 'ET' },
-                { username: 'eyden trading', password: 'xavemi77', name: 'Eyden Trading', role: 'Administrator', type: 'admin', avatar: 'ET' },
-                { username: 'worker', password: 'xavemi77', name: 'Worker', role: 'Worker', type: 'worker', avatar: 'W' }
-              ])));
-
-              if (rememberMe) {
-                localStorage.setItem('remember_username', username);
-              } else {
-                localStorage.removeItem('remember_username');
-              }
-
-              successMsg.textContent = `✅ Welcome ${user.name}! Redirecting...`;
-              successMsg.style.display = 'block';
-
-              setTimeout(() => {
-                window.location.href = 'admin-dashboard.html';
-              }, 800);
-            } catch (e) {
-              errorMsg.textContent = '❌ Could not save the session to this device. Please try again.';
-              errorMsg.style.display = 'block';
-              loadingSpinner.style.display = 'none';
-              loginBtn.disabled = false;
-            }
+          const destination = await getProfileAndRedirect(data.user);
+          if (rememberMe) {
+            localStorage.setItem('remember_username', email);
           } else {
-            errorMsg.textContent = '❌ Invalid username or password. Please try again.';
-            errorMsg.style.display = 'block';
-            loadingSpinner.style.display = 'none';
-            loginBtn.disabled = false;
+            localStorage.removeItem('remember_username');
           }
-        }, 600);
+
+          successMsg.textContent = `✅ Welcome! Redirecting...`;
+          successMsg.style.display = 'block';
+          setTimeout(() => { window.location.href = destination; }, 800);
+        } catch (error) {
+          showLoginError(error.message || 'Unable to sign in. Please try again.');
+          loadingSpinner.style.display = 'none';
+          loginBtn.disabled = false;
+        }
       }
 
       function resetPassword() {

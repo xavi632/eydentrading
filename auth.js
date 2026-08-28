@@ -1,6 +1,6 @@
 // Authentication helper for Eyden Trading
 (function() {
-  const publicPages = ['login.html', 'index.html'];
+  const publicPages = ['login.html'];
   const currentPage = window.location.pathname.split('/').pop() || 'index.html';
 
   const appUsers = [
@@ -12,7 +12,20 @@
   function isLoggedIn() {
     try {
       const session = localStorage.getItem('user_session');
-      return session ? JSON.parse(session) : null;
+      const parsedSession = session ? JSON.parse(session) : null;
+      if (!parsedSession || !parsedSession.username) return null;
+
+      if (parsedSession.authProvider === 'supabase' && parsedSession.id && parsedSession.role) {
+        return parsedSession;
+      }
+
+      const account = getUsers().find((user) =>
+        String(user.username || '').trim().toLowerCase() === String(parsedSession.username).trim().toLowerCase()
+        && String(user.type || '').trim().toLowerCase() === String(parsedSession.type || '').trim().toLowerCase()
+        && user.status !== 'inactive'
+      );
+
+      return account ? { ...parsedSession, ...account } : null;
     } catch (e) {
       return null;
     }
@@ -96,11 +109,14 @@
     }
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', checkAuth);
-  } else {
-    checkAuth();
-  }
+  checkAuth();
+  document.addEventListener('DOMContentLoaded', () => {
+    const user = isLoggedIn();
+    if (user) {
+      updateUserCard(user);
+      updateHomeAuth(user);
+    }
+  });
 
   window.appUsers = appUsers;
   window.authHelper = {

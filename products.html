@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Eyden Trading | Products</title>
     <link rel="stylesheet" href="styles.css" />
+    <script src="auth.js"></script>
   </head>
   <body>
     <div class="app-shell">
@@ -74,6 +75,9 @@
         <script src="cart.js"></script>
         <script>
           (function(){
+            const SUPABASE_URL = 'https://egzgmtierpztzrrefeos.supabase.co';
+            const SUPABASE_KEY = 'sb_publishable_Ln5qJKlIQQIQGxQMx6gy8w_4D70sX2i';
+
             const defaultProducts = [
               { sku: '101001', title: 'Aardappelen', price: 520.00, image: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=500&q=80', inStock: true },
               { sku: '101002', title: 'Ui', price: 320.00, image: 'https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=crop&w=500&q=80', inStock: false },
@@ -98,6 +102,29 @@
 
             function formatPrice(value) {
               return 'Srd ' + Number(value).toFixed(2).replace('.', ',');
+            }
+
+            async function loadProductsFromSupabase() {
+              try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/products?select=sku,title,category,price,image,in_stock`, {
+                  headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
+                });
+                if (!response.ok) throw new Error(await response.text());
+
+                const remoteProducts = await response.json();
+                if (!Array.isArray(remoteProducts) || !remoteProducts.length) return;
+                localStorage.setItem('eyden_products_v1', JSON.stringify(remoteProducts.map((product) => ({
+                  sku: product.sku,
+                  title: product.title,
+                  category: product.category || 'General',
+                  price: Number(product.price) || 0,
+                  image: product.image || '',
+                  inStock: Boolean(product.in_stock)
+                }))));
+                renderProducts();
+              } catch (error) {
+                console.warn('Could not load products from Supabase. Using local products.', error);
+              }
             }
 
             function setQty(el, q) {
@@ -206,6 +233,7 @@
             }
 
             renderProducts();
+            loadProductsFromSupabase();
           })();
         </script>
       </main>

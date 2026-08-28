@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Eyden Trading Dashboard</title>
+    <script src="auth.js"></script>
     <style>
       :root {
         --bg: #07111d;
@@ -517,20 +518,20 @@
         </div>
 
         <nav class="menu" aria-label="Main navigation">
-          <a href="#" class="active"><span class="icon">⌂</span>Home</a>
-          <a href="#"><span class="icon">＋</span>Create Bond</a>
-          <a href="#"><span class="icon">▦</span>Products</a>
-          <a href="#"><span class="icon">◎</span>Customers</a>
-          <a href="#"><span class="icon">◫</span>Orders</a>
-          <a href="#"><span class="icon">◇</span>Reports</a>
-          <a href="#"><span class="icon">⚙</span>Settings</a>
+          <a href="index.html" class="active"><span class="icon">⌂</span>Home</a>
+          <a href="create-bond.html"><span class="icon">＋</span>Create Bond</a>
+          <a href="products.html"><span class="icon">▦</span>Products</a>
+          <a href="customers.html"><span class="icon">◎</span>Customers</a>
+          <a href="orders.html"><span class="icon">◫</span>Orders</a>
+          <a href="reports.html"><span class="icon">◇</span>Reports</a>
+          <a href="settings.html"><span class="icon">⚙</span>Settings</a>
         </nav>
 
         <div class="sidebar-footer">
           <div class="user-card">
             <div class="avatar">JT</div>
             <div>
-              <strong>Jude T.</strong>
+              <strong>eydentrading.</strong>
               <small>Administrator</small>
             </div>
           </div>
@@ -561,7 +562,7 @@
 
             <div class="hero-actions">
               <button class="primary-btn">Create Bond</button>
-              <button class="secondary-btn">View Products</button>
+              <a href="products.html" class="secondary-btn">View Products</a>
             </div>
           </div>
 
@@ -588,17 +589,17 @@
             <p>Start a new customer bond or sales agreement.</p>
           </div>
 
-          <div class="action-card">
+          <a href="products.html" class="action-card">
             <div class="icon-wrap">▣</div>
             <h3>Products</h3>
             <p>Browse stock, prices, and item details.</p>
-          </div>
+          </a>
 
-          <div class="action-card">
+          <a href="customers.html" class="action-card">
             <div class="icon-wrap">◌</div>
             <h3>Customers</h3>
             <p>Review contacts, leads, and saved profiles.</p>
-          </div>
+          </a>
 
           <div class="action-card">
             <div class="icon-wrap">⚙</div>
@@ -828,7 +829,6 @@
         });
       }
     </script>
-    <script src="auth.js"></script>
   </body>
 </html>
 
