@@ -1,8 +1,8 @@
 create or replace function public.create_sale_with_items(
   p_customer_id uuid,
-  p_payment_method text,
+  p_items jsonb,
   p_notes text,
-  p_items jsonb
+  p_payment_method text
 )
 returns public.sales
 language plpgsql
@@ -32,15 +32,19 @@ begin
     raise exception 'Please add at least one product to the sale.' using errcode = '22023';
   end if;
 
+  if p_payment_method is null or trim(p_payment_method) = '' then
+    raise exception 'Please select a payment method.' using errcode = '22023';
+  end if;
+
   perform 1
     from public.customers
    where id = p_customer_id;
-     
+
   if not found then
     raise exception 'The selected customer was not found.' using errcode = '23503';
   end if;
 
-  -- Serialize order number generation without locking or changing products.
+  -- Serialize order number generation without changing products or inventory.
   perform pg_advisory_xact_lock(hashtext('eyden-trading-sales'));
 
   select coalesce(max(nullif(regexp_replace(order_number::text, '[^0-9]', '', 'g'), '')::bigint), 1000) + 1
@@ -49,6 +53,14 @@ begin
 
   for item in select * from jsonb_array_elements(p_items)
   loop
+    if item is null then
+      raise exception 'One of the sale items is invalid.' using errcode = '22023';
+    end if;
+
+    if (item->>'product_id') is null then
+      raise exception 'Each sale item must include a product_id.' using errcode = '22023';
+    end if;
+
     select * into product_row
       from public.products
      where id = (item->>'product_id')::uuid;
@@ -87,11 +99,10 @@ begin
 
     insert into public.sale_items (sale_id, product_id, quantity, unit_price, line_total)
     values (new_sale.id, product_row.id, item_quantity, item_unit_price, item_line_total);
-
   end loop;
 
   return new_sale;
 end;
 $$;
 
-grant execute on function public.create_sale_with_items(uuid, text, text, jsonb) to authenticated;
+grant execute on function public.create_sale_with_items(uuid, jsonb, text, text) to authenticated;
